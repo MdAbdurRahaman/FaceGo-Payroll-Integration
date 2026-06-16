@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceGo Payroll Verification Terminal</title>
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-circle">
+          <div class="logo-dot"></div>
+        </div>
+        <div class="brand-text">
+          <h1>FaceGo Link</h1>
+          <span class="subtext">ERP Payroll Gateway</span>
+        </div>
+      </div>
+      
+      <div class="system-status">
+        <div id="connection-status" class="status-indicator offline">
+          <span class="indicator-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+        <div class="clock-display" id="live-clock">--:--:--</div>
+      </div>
+    </header>
+
+    <!-- MAIN DISPLAY KIOSK -->
+    <main class="kiosk-container">
+      
+      <!-- STATE 1: IDLE / SCAN FACE -->
+      <section id="state-idle" class="kiosk-state active">
+        <div class="scan-area">
+          <div class="scanner-ring">
+            <div class="scan-radar-line"></div>
+            <div class="scan-bracket top-left"></div>
+            <div class="scan-bracket top-right"></div>
+            <div class="scan-bracket bottom-left"></div>
+            <div class="scan-bracket bottom-right"></div>
+            <div class="scan-avatar-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 21a6 6 0 0 0-12 0" />
+                <circle cx="12" cy="10" r="4" />
+                <path d="M12 2v2M12 20v2M4 12H2M22 12h-2" />
+              </svg>
+            </div>
+          </div>
+          <h2 class="scan-title">Awaiting Identification</h2>
+          <p class="scan-desc">Please present your face to the Hanvon FaceID terminal to review and verify your payroll transactions.</p>
+        </div>
+      </section>
+
+      <!-- STATE 2: EMPLOYEE PROFILE CARD & ACTIONS -->
+      <section id="state-profile" class="kiosk-state">
+        <div class="profile-card-container">
+          <div class="glass-card profile-card">
+            
+            <div class="profile-header">
+              <div class="profile-avatar" id="emp-avatar-circle">
+                <span id="emp-initials">--</span>
+              </div>
+              <div class="profile-title">
+                <h2 id="emp-name">Md. Abdur Rahaman</h2>
+                <div class="emp-badge-id">ID: <span id="emp-id">EMP-1042</span></div>
+              </div>
+            </div>
+
+            <div class="profile-details-grid">
+              <div class="detail-item">
+                <span class="detail-label">Designation</span>
+                <span class="detail-val" id="emp-designation">Data Processing Associate</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Department</span>
+                <span class="detail-val" id="emp-department">Operations</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Section</span>
+                <span class="detail-val" id="emp-section">Data Processing</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Unit</span>
+                <span class="detail-val" id="emp-unit">Unit-2</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Shift</span>
+                <span class="detail-val" id="emp-shift">Day</span>
+              </div>
+              <div class="detail-item status-verified">
+                <span class="detail-label">Hardware Verification</span>
+                <span class="detail-val" id="scan-meta-device">Verified by terminal FaceID</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="action-selection">
+            <h3>Select Action</h3>
+            <div class="action-buttons-grid">
+              <button class="action-btn btn-salary" data-payout-type="salary">
+                <div class="btn-icon">💰</div>
+                <div class="btn-content">
+                  <span class="btn-title">Base Salary</span>
+                  <span class="btn-subtitle">Review payroll details</span>
+                </div>
+              </button>
+              
+              <button class="action-btn btn-ot" data-payout-type="ot">
+                <div class="btn-icon">⚡</div>
+                <div class="btn-content">
+                  <span class="btn-title">Overtime Pay</span>
+                  <span class="btn-subtitle">Calculate OT amount</span>
+                </div>
+              </button>
+              
+              <button class="action-btn btn-dorm" data-payout-type="dorm_charge">
+                <div class="btn-icon">🏢</div>
+                <div class="btn-content">
+                  <span class="btn-title">Dorm Charge</span>
+                  <span class="btn-subtitle">Review lodging balance</span>
+                </div>
+              </button>
+            </div>
+            
+            <button class="cancel-session-btn" id="btn-cancel-session">Exit Session</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATE 3: TRANSACTION CONFIRMATION -->
+      <section id="state-confirm" class="kiosk-state">
+        <div class="glass-card confirmation-card">
+          <div class="conf-icon" id="conf-type-icon">💰</div>
+          <h2 class="conf-title" id="conf-payout-title">Salary Payout Verification</h2>
+          
+          <div class="amount-display-container">
+            <span class="amount-currency">BDT</span>
+            <span class="amount-value" id="conf-amount">0.00</span>
+          </div>
+
+          <div class="recipient-summary">
+            <p>Processing payout request for:</p>
+            <strong><span id="conf-emp-name">Md. Abdur Rahaman</span></strong>
+            <span class="conf-emp-id" id="conf-emp-id">ID: 1042</span>
+          </div>
+
+          <div class="confirmation-actions">
+            <button class="btn-pay" id="btn-execute-pay">
+              <span class="btn-spinner hidden"></span>
+              Confirm Payment
+            </button>
+            <button class="btn-cancel" id="btn-cancel-pay">Cancel</button>
+          </div>
+
+          <div class="security-disclaimer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>Secured Session: This action will write back instantly to the ERP system.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATE 4: SUCCESS feedback -->
+      <section id="state-success" class="kiosk-state">
+        <div class="glass-card success-card">
+          <div class="success-checkmark-wrapper">
+            <div class="success-checkmark">
+              <div class="checkmark-circle"></div>
+              <div class="checkmark-stem"></div>
+              <div class="checkmark-kick"></div>
+            </div>
+          </div>
+          
+          <h2 class="success-title">Payment Recorded</h2>
+          <p class="success-msg">The transaction has been successfully transmitted and registered in the ERP database.</p>
+          
+          <div class="receipt-box">
+            <div class="receipt-row">
+              <span>Transaction ID</span>
+              <span class="receipt-val font-mono" id="receipt-txn-id">TXN-000000000</span>
+            </div>
+            <div class="receipt-row">
+              <span>Paid To</span>
+              <span class="receipt-val" id="receipt-emp-name">Sarah Jenkins</span>
+            </div>
+            <div class="receipt-row">
+              <span>Amount</span>
+              <span class="receipt-val highlight" id="receipt-amount">BDT 0.00</span>
+            </div>
+            <div class="receipt-row">
+              <span>Type</span>
+              <span class="receipt-val capitalize" id="receipt-type">Overtime</span>
+            </div>
+          </div>
+
+          <div class="auto-reset-indicator">
+            <span>Returning to standby mode in <strong id="reset-counter">4</strong> seconds...</span>
+            <button class="instant-reset-btn" id="btn-done-payout">Done</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATE 5: ERROR / UNREGISTERED -->
+      <section id="state-error" class="kiosk-state">
+        <div class="glass-card error-card">
+          <div class="error-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          
+          <h2 class="error-title">Verification Refused</h2>
+          <p class="error-msg" id="error-message">This employee record could not be located in the central payroll system.</p>
+          
+          <div class="error-meta" id="error-meta-details">
+            Scanned ID: <strong id="error-scanned-id">---</strong>
+          </div>
+
+          <div class="error-actions">
+            <button class="btn-error-reset" id="btn-error-reset">Dismiss & Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SESSION TIMEOUT FLOATING WARNING -->
+      <div id="session-timeout-banner" class="timeout-banner hidden">
+        <div class="timeout-content">
+          <span>Inactivity alert! Session resets in <strong id="timeout-seconds">10</strong>s</span>
+          <button class="btn-keep-session" id="btn-keep-session">Keep Active</button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- DEVICE SIMULATOR SIDEBAR (COLLAPSED BY DEFAULT) -->
+    <aside id="simulator-sidebar" class="simulator-sidebar">
+      <button class="simulator-toggle" id="btn-toggle-sim" aria-label="Toggle Simulator">
+        <span class="toggle-icon">⚡</span>
+        <span class="toggle-text">Terminal Simulator</span>
+      </button>
+
+      <div class="simulator-content">
+        <div class="sim-section">
+          <h3>Hanvon Device Simulator</h3>
+          <p class="sim-help">Mock a network POST request sent by the physical terminal's FaceID Push Protocol.</p>
+          
+          <div class="form-group">
+            <label for="sim-employee-select">Select Employee</label>
+            <select id="sim-employee-select" class="form-input">
+              <option value="">Loading mock database...</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="sim-device-id">Mock Device ID</label>
+            <input type="text" id="sim-device-id" class="form-input" value="HV-Kiosk-002">
+          </div>
+
+          <button class="btn-sim-trigger" id="btn-sim-scan">
+            <span class="btn-sim-icon">👤</span>
+            Simulate Face Recognition Scan
+          </button>
+        </div>
+
+        <div class="sim-section border-top">
+          <h3>Quick Add Employee (ERP)</h3>
+          <p class="sim-help">Register a new mock employee profile in the local database to verify integration.</p>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="new-emp-id">Employee ID</label>
+              <input type="text" id="new-emp-id" class="form-input" placeholder="e.g. 1045">
+            </div>
+            <div class="form-group">
+              <label for="new-emp-name">Full Name</label>
+              <input type="text" id="new-emp-name" class="form-input" placeholder="e.g. Rahim Uddin">
+            </div>
+            <div class="form-group">
+              <label for="new-emp-desig">Designation</label>
+              <input type="text" id="new-emp-desig" class="form-input" placeholder="e.g. Supervisor">
+            </div>
+            <div class="form-group">
+              <label for="new-emp-dept">Department</label>
+              <input type="text" id="new-emp-dept" class="form-input" placeholder="e.g. Finishing">
+            </div>
+            <div class="form-group">
+              <label for="new-emp-salary">Base Salary (BDT)</label>
+              <input type="number" id="new-emp-salary" class="form-input" value="35000">
+            </div>
+            <div class="form-group">
+              <label for="new-emp-ot">OT Balance (BDT)</label>
+              <input type="number" id="new-emp-ot" class="form-input" value="2200">
+            </div>
+          </div>
+          
+          <button class="btn-sim-secondary" id="btn-add-employee">Save to ERP Database</button>
+        </div>
+
+        <div class="sim-section border-top flex-grow">
+          <div class="section-header-row">
+            <h3>Recent Payouts Log</h3>
+            <button class="btn-clear-logs" id="btn-clear-logs">Clear Logs</button>
+          </div>
+          <div class="transaction-list" id="sim-transaction-list">
+            <div class="tx-empty-state">No payments processed in this session.</div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Socket.io library (automatically served by server.js backend) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>

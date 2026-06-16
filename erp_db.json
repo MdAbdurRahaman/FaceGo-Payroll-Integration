@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1042",
+    "name": "Md. Abdur Rahaman",
+    "designation": "Data Processing Associate",
+    "department": "Operations",
+    "section": "Data Processing",
+    "unit": "Unit-2",
+    "shift": "Day",
+    "salary": 45000,
+    "ot": 0,
+    "dorm_charge": 1200
+  },
+  {
+    "id": "1001",
+    "name": "Sarah Jenkins",
+    "designation": "Senior HR Specialist",
+    "department": "Human Resources",
+    "section": "Recruitment & Payroll",
+    "unit": "Unit-1",
+    "shift": "Day",
+    "salary": 65000,
+    "ot": 0,
+    "dorm_charge": 0
+  },
+  {
+    "id": "1002",
+    "name": "Michael Chang",
+    "designation": "Production Line Engineer",
+    "department": "Engineering",
+    "section": "Assembly Line B",
+    "unit": "Unit-3",
+    "shift": "Night",
+    "salary": 52000,
+    "ot": 8400,
+    "dorm_charge": 1800
+  },
+  {
+    "id": "1003",
+    "name": "Amina Bello",
+    "designation": "Quality Control Inspector",
+    "department": "Quality Assurance",
+    "section": "Inspection-2",
+    "unit": "Unit-2",
+    "shift": "Day",
+    "salary": 41000,
+    "ot": 1800,
+    "dorm_charge": 1200
+  },
+  {
+    "id": "1004",
+    "name": "Carlos Rodriguez",
+    "designation": "Logistics Coordinator",
+    "department": "Supply Chain",
+    "section": "Warehouse",
+    "unit": "Unit-1",
+    "shift": "Day",
+    "salary": 48000,
+    "ot": 4500,
+    "dorm_charge": 0
+  }
+]
