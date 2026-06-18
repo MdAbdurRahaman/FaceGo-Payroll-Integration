@@ -58,5 +58,17 @@
     "salary": 48000,
     "ot": 4500,
     "dorm_charge": 0
+  },
+  {
+    "id": "1234",
+    "name": "adg",
+    "designation": "Employee",
+    "department": "General",
+    "section": "General",
+    "unit": "Unit-1",
+    "shift": "Day",
+    "salary": 35000,
+    "ot": 2200,
+    "dorm_charge": 1200
   }
 ]

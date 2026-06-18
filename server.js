@@ -19,7 +19,15 @@ const DB_PATH = path.join(__dirname, 'erp_db.json');
 const LOG_PATH = path.join(__dirname, 'transactions.json');
 
 app.use(cors());
+// Global request logger for debugging network connectivity
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip || req.socket.remoteAddress}`);
+  next();
+});
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// Support text/xml and application/xml payloads by loading them as raw text
+app.use(express.text({ type: ['*/xml', 'text/xml', 'application/xml'] }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper to read ERP database
@@ -128,13 +136,41 @@ app.post('/api/transactions/clear', (req, res) => {
 // Configure the Hanvon device to push to: http://<server-ip>:5000/api/scan
 app.post('/api/scan', (req, res) => {
   console.log('--- Received Hanvon Scan Event ---');
-  console.log('Payload:', req.body);
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Raw Payload:', req.body);
+
+  let payload = {};
+
+  // Parse payload if it's XML (either content-type matches or the body string starts with XML markup)
+  if (typeof req.body === 'string' && (req.body.trim().startsWith('<') || req.headers['content-type']?.includes('xml'))) {
+    try {
+      const xmlStr = req.body;
+      const getXmlTag = (tag) => {
+        const regex = new RegExp(`<${tag}>([^<]+)</${tag}>`, 'i');
+        const match = xmlStr.match(regex);
+        return match ? match[1].trim() : null;
+      };
+
+      payload = {
+        UserID: getXmlTag('UserID') || getXmlTag('id') || getXmlTag('userid'),
+        DeviceID: getXmlTag('DeviceID') || getXmlTag('deviceid'),
+        VerifyMode: getXmlTag('VerifyMode') || getXmlTag('verifymode'),
+        Time: getXmlTag('Time') || getXmlTag('time')
+      };
+      console.log('Parsed XML Payload:', payload);
+    } catch (err) {
+      console.error('Error parsing XML payload:', err);
+    }
+  } else {
+    // Already parsed as JSON or urlencoded object
+    payload = req.body || {};
+  }
 
   // Hanvon devices typically send "UserID" or "id". We accommodate both.
-  const employeeId = req.body.UserID || req.body.id || req.body.userid;
-  const deviceId = req.body.DeviceID || req.body.deviceid || 'Unknown Device';
-  const verifyMode = req.body.VerifyMode || req.body.verifymode || 'Face';
-  const time = req.body.Time || req.body.time || new Date().toISOString();
+  const employeeId = payload.UserID || payload.id || payload.userid;
+  const deviceId = payload.DeviceID || payload.deviceid || 'Unknown Device';
+  const verifyMode = payload.VerifyMode || payload.verifymode || 'Face';
+  const time = payload.Time || payload.time || new Date().toISOString();
 
   if (!employeeId) {
     console.error('Scan failed: No UserID/employeeId in payload');
