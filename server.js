@@ -28,6 +28,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Support text/xml and application/xml payloads by loading them as raw text
 app.use(express.text({ type: ['*/xml', 'text/xml', 'application/xml'] }));
+// Support default paths pushed by Hanvon devices (e.g. /, /post, /receivelog.do, etc.) by rewriting them to /api/scan
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    const defaultPaths = ['/', '/post', '/receivelog.do', '/receivelogs.do', '/api/post', '/api/receivelog'];
+    if (defaultPaths.includes(req.path)) {
+      console.log(`[URL Rewrite] Intercepted POST to ${req.path}. Rewriting URL to /api/scan to accommodate device default push path.`);
+      req.url = '/api/scan';
+    }
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper to read ERP database
