@@ -1,20 +1,1064 @@
 [
   {
-    "transactionId": "TXN-1781903223235-2863",
-    "timestamp": "2026-06-19T21:07:03.235Z",
-    "employeeId": "2001",
-    "employeeName": "John Doe",
-    "type": "ot",
-    "amount": 5000,
-    "status": "SUCCESS"
+    "id": "1781950253952979",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 15:41:56"
   },
   {
-    "transactionId": "TXN-1781903147024-5233",
-    "timestamp": "2026-06-19T21:05:47.024Z",
-    "employeeId": "1042",
-    "employeeName": "Md. Abdur Rahaman",
+    "id": "1781950253994506",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 15:46:29"
+  },
+  {
+    "id": "178195025403549",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 15:51:54"
+  },
+  {
+    "id": "1781950254100721",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 15:53:31"
+  },
+  {
+    "id": "1781950254174248",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 15:56:20"
+  },
+  {
+    "id": "1781950254250710",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:03:48"
+  },
+  {
+    "id": "1781950254300416",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:08:47"
+  },
+  {
+    "id": "1781950254346638",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:14:02"
+  },
+  {
+    "id": "178195025457038",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20T10:10:54.569Z"
+  },
+  {
+    "id": "1781950254809671",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:16:32"
+  },
+  {
+    "id": "1781950254846241",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:22:11"
+  },
+  {
+    "id": "1781950254924551",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:25:34"
+  },
+  {
+    "id": "1781950254983587",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:41:50"
+  },
+  {
+    "id": "1781950255047657",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:47:32"
+  },
+  {
+    "id": "1781950255109752",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:49:43"
+  },
+  {
+    "id": "1781950255156137",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:51:56"
+  },
+  {
+    "id": "1781950255229302",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 16:56:15"
+  },
+  {
+    "id": "1781950255432996",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 17:11:31"
+  },
+  {
+    "id": "1781950255506521",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-16 17:12:50"
+  },
+  {
+    "id": "1781950255575697",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-17 14:37:08"
+  },
+  {
+    "id": "1781950255655796",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-17 14:59:36"
+  },
+  {
+    "id": "1781950255804452",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-17 15:05:49"
+  },
+  {
+    "id": "1781950255862775",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-17 16:19:44"
+  },
+  {
+    "id": "1781950255943568",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 10:04:15"
+  },
+  {
+    "id": "1781950256019536",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 11:16:36"
+  },
+  {
+    "id": "1781950256187369",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 11:17:57"
+  },
+  {
+    "id": "1781950256221356",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:19:07"
+  },
+  {
+    "id": "1781950256258248",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:21:10"
+  },
+  {
+    "id": "1781950256294454",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:22:13"
+  },
+  {
+    "id": "1781950256328162",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:33:04"
+  },
+  {
+    "id": "1781950256377788",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:34:59"
+  },
+  {
+    "id": "1781950256415624",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:42:41"
+  },
+  {
+    "id": "1781950256452138",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:45:01"
+  },
+  {
+    "id": "1781950256692436",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 12:50:00"
+  },
+  {
+    "id": "1781950256730910",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 15:12:46"
+  },
+  {
+    "id": "1781950256766120",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 16:51:54"
+  },
+  {
+    "id": "1781950256804519",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:00:25"
+  },
+  {
+    "id": "1781950256847327",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:25:55"
+  },
+  {
+    "id": "17819502568867",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:26:59"
+  },
+  {
+    "id": "1781950256927242",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:28:01"
+  },
+  {
+    "id": "1781950256964224",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:29:28"
+  },
+  {
+    "id": "1781950257118611",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:43:16"
+  },
+  {
+    "id": "1781950257156154",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:44:24"
+  },
+  {
+    "id": "1781950257196775",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:46:13"
+  },
+  {
+    "id": "1781950257234244",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:53:36"
+  },
+  {
+    "id": "1781950257270639",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:54:57"
+  },
+  {
+    "id": "178195025731128",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 17:57:57"
+  },
+  {
+    "id": "1781950257405105",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 18:04:04"
+  },
+  {
+    "id": "1781950257526577",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 18:06:11"
+  },
+  {
+    "id": "1781950257725890",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 18:07:15"
+  },
+  {
+    "id": "1781950257798969",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 18:10:06"
+  },
+  {
+    "id": "1781950257840295",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-18 18:15:43"
+  },
+  {
+    "id": "1781950257962664",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 03:01:46"
+  },
+  {
+    "id": "1781950258019811",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 03:06:19"
+  },
+  {
+    "id": "1781950258106963",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 03:37:26"
+  },
+  {
+    "id": "1781950258190963",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 09:49:18"
+  },
+  {
+    "id": "1781950258231833",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 10:10:22"
+  },
+  {
+    "id": "1781950258400876",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:08:48"
+  },
+  {
+    "id": "1781950258443819",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:17:12"
+  },
+  {
+    "id": "178195025848814",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:19:52"
+  },
+  {
+    "id": "1781950258530467",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:21:55"
+  },
+  {
+    "id": "1781950258587556",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:26:01"
+  },
+  {
+    "id": "1781950258692108",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:27:51"
+  },
+  {
+    "id": "1781950258757429",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:29:12"
+  },
+  {
+    "id": "1781950258810952",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:35:48"
+  },
+  {
+    "id": "1781950259017871",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:37:19"
+  },
+  {
+    "id": "1781950259064781",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 11:39:21"
+  },
+  {
+    "id": "1781950259146739",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 12:15:37"
+  },
+  {
+    "id": "1781950259196721",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 12:22:10"
+  },
+  {
+    "id": "1781950259274760",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 12:26:56"
+  },
+  {
+    "id": "178195025932392",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 12:32:09"
+  },
+  {
+    "id": "1781950259362763",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 13:17:41"
+  },
+  {
+    "id": "1781950259449846",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 13:19:43"
+  },
+  {
+    "id": "1781950259662631",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 13:22:10"
+  },
+  {
+    "id": "1781950259716192",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 13:24:12"
+  },
+  {
+    "id": "1781950259788308",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 13:49:50"
+  },
+  {
+    "id": "1781950259854693",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:01:28"
+  },
+  {
+    "id": "1781950259905158",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:02:40"
+  },
+  {
+    "id": "1781950259951506",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:12:34"
+  },
+  {
+    "id": "1781950260098983",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:13:42"
+  },
+  {
+    "id": "1781950260147335",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:17:34"
+  },
+  {
+    "id": "1781950260322918",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:30:29"
+  },
+  {
+    "id": "1781950260373819",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:37:29"
+  },
+  {
+    "id": "1781950260415801",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:39:18"
+  },
+  {
+    "id": "1781950260473852",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 14:41:05"
+  },
+  {
+    "id": "1781950260526561",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:05:52"
+  },
+  {
+    "id": "1781950260628913",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:24:18"
+  },
+  {
+    "id": "1781950260700556",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:26:48"
+  },
+  {
+    "id": "1781950260797937",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:29:38"
+  },
+  {
+    "id": "1781950260959558",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:34:40"
+  },
+  {
+    "id": "1781950261012818",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:36:06"
+  },
+  {
+    "id": "1781950261085629",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:37:21"
+  },
+  {
+    "id": "1781950261160662",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:38:59"
+  },
+  {
+    "id": "1781950261210696",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:40:54"
+  },
+  {
+    "id": "1781950261295597",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:51:54"
+  },
+  {
+    "id": "1781950261370771",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 15:54:16"
+  },
+  {
+    "id": "1781950261417771",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:02:14"
+  },
+  {
+    "id": "17819502616080",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:04:21"
+  },
+  {
+    "id": "1781950261653386",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:05:26"
+  },
+  {
+    "id": "1781950261690693",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:06:43"
+  },
+  {
+    "id": "1781950261735467",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:08:48"
+  },
+  {
+    "id": "1781950261789962",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:10:26"
+  },
+  {
+    "id": "1781950261830491",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:11:53"
+  },
+  {
+    "id": "1781950261896299",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:13:33"
+  },
+  {
+    "id": "1781950261964215",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:18:07"
+  },
+  {
+    "id": "178195104252332",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 16:31:13"
+  },
+  {
+    "id": "1781955046058187",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 17:37:56"
+  },
+  {
+    "id": "1781955238507946",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 17:41:09"
+  },
+  {
+    "id": "1781955319894752",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 17:42:30"
+  },
+  {
+    "id": "1781956053772347",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "HV-Kiosk-002",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20T11:47:33.667Z"
+  },
+  {
+    "id": "178195621440351",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 17:57:25"
+  },
+  {
+    "id": "1781956221771",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "PAYOUT_SALARY",
+    "amount": 35000,
+    "timestamp": "2026-06-20T11:50:21.771Z"
+  },
+  {
+    "id": "1781956347019199",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 17:59:37"
+  },
+  {
+    "id": "1781956354313",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "PAYOUT_SALARY",
+    "amount": 35000,
+    "timestamp": "2026-06-20T11:52:34.313Z"
+  },
+  {
+    "id": "1781956639469124",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 18:04:30"
+  },
+  {
+    "id": "1781956644030",
+    "transactionId": "TXN-1781956644030-7243",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "ot",
+    "payoutType": "PAYOUT_OT",
+    "amount": 2200,
+    "timestamp": "2026-06-20T11:57:24.030Z"
+  },
+  {
+    "id": "1781956713072283",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 18:05:43"
+  },
+  {
+    "id": "1781956735937",
+    "transactionId": "TXN-1781956735937-9811",
+    "employeeId": "1234",
+    "employeeName": "adg",
     "type": "salary",
-    "amount": 45000,
-    "status": "SUCCESS"
+    "payoutType": "PAYOUT_SALARY",
+    "amount": 35000,
+    "timestamp": "2026-06-20T11:58:55.937Z"
   }
 ]
