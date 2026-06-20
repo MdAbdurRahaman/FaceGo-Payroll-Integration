@@ -167,22 +167,35 @@ app.post('/api/pay', (req, res) => {
   const amount = employee[type];
   console.log(`Executing payment for ${employee.name}: Type: ${type}, Amount: ${amount}`);
 
-  // Save payout event to transactions
-  const transactions = readTransactions();
-  transactions.push({
+  // Create a structured transaction object compatible with both the frontend UI and database
+  const transactionId = `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const timestamp = new Date().toISOString();
+  const newTransaction = {
     id: Date.now().toString(),
+    transactionId,
     employeeId: employee.id,
     employeeName: employee.name,
-    type: `PAYOUT_${type.toUpperCase()}`,
+    type, // keep standard type ('salary', 'ot', 'dorm_charge') for frontend log UI parsing
+    payoutType: `PAYOUT_${type.toUpperCase()}`,
     amount: amount,
-    timestamp: new Date().toISOString()
-  });
+    timestamp
+  };
+
+  // Save payout event to transactions
+  const transactions = readTransactions();
+  transactions.push(newTransaction);
   writeTransactions(transactions);
 
   // Clear active scan session since payment is done
   activeScanSession = null;
 
-  res.json({ success: true, employeeName: employee.name, type, amount });
+  res.json({
+    success: true,
+    employeeName: employee.name,
+    type,
+    amount,
+    transaction: newTransaction // Returned to prevent browser client TypeError
+  });
 });
 
 // API Fallback: Handle standard HTTP POST scans (if device uses HTTP engine)
