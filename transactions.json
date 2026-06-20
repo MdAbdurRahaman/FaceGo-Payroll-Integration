@@ -1060,5 +1060,60 @@
     "payoutType": "PAYOUT_SALARY",
     "amount": 35000,
     "timestamp": "2026-06-20T11:58:55.937Z"
+  },
+  {
+    "id": "1781957057777644",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 18:11:28"
+  },
+  {
+    "id": "1781957344406575",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 18:16:15"
+  },
+  {
+    "id": "1781957363635",
+    "transactionId": "TXN-1781957363635-3160",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "salary",
+    "payoutType": "PAYOUT_SALARY",
+    "amount": 35000,
+    "timestamp": "2026-06-20T12:09:23.635Z"
+  },
+  {
+    "id": "1781957411081638",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 18:17:21"
+  },
+  {
+    "id": "1781958051357690",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "FaceGo-Terminal",
+    "verifyMode": "Face",
+    "timestamp": "2026-06-20 18:28:02"
+  },
+  {
+    "id": "1781958117650528",
+    "employeeId": "1234",
+    "employeeName": "adg",
+    "type": "SCAN_IN",
+    "deviceId": "ERP-Web-Simulator",
+    "verifyMode": "Simulated Face",
+    "timestamp": "2026-06-20T12:21:57.529Z"
   }
 ]
