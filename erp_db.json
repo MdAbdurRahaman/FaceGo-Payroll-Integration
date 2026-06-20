@@ -70,5 +70,17 @@
     "salary": 35000,
     "ot": 2200,
     "dorm_charge": 1200
+  },
+  {
+    "id": "2001",
+    "name": "John Doe",
+    "designation": "Manager",
+    "department": "Operations",
+    "section": "General",
+    "unit": "Unit-1",
+    "shift": "Day",
+    "salary": 65000,
+    "ot": 0,
+    "dorm_charge": 1200
   }
 ]

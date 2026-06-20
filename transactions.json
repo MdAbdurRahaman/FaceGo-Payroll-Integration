@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "transactionId": "TXN-1781903223235-2863",
+    "timestamp": "2026-06-19T21:07:03.235Z",
+    "employeeId": "2001",
+    "employeeName": "John Doe",
+    "type": "ot",
+    "amount": 5000,
+    "status": "SUCCESS"
+  },
+  {
+    "transactionId": "TXN-1781903147024-5233",
+    "timestamp": "2026-06-19T21:05:47.024Z",
+    "employeeId": "1042",
+    "employeeName": "Md. Abdur Rahaman",
+    "type": "salary",
+    "amount": 45000,
+    "status": "SUCCESS"
+  }
+]
