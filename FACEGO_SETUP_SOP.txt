@@ -1,0 +1,103 @@
+================================================================================
+          STANDARD OPERATING PROCEDURE (SOP): FACEGO / HANVON FACEID SETUP
+                      PAYROLL & KIOSK MIDDLEWARE INTEGRATION
+================================================================================
+
+This document guides you through the step-by-step setup and configuration of the 
+Hanvon FaceID / FaceGo physical face recognition terminal to connect it to the 
+local Express/Socket.io payroll integration dashboard.
+
+--------------------------------------------------------------------------------
+1. NETWORK REQUIREMENTS & TOPOLOGY
+--------------------------------------------------------------------------------
+- The FaceGo terminal and the Kiosk host computer (server) must reside on the 
+  same local area network (LAN) subnet.
+- The wireless access point or router must NOT have "AP Isolation" or "Client 
+  Isolation" enabled, as this blocks direct TCP/UDP packets between connected devices.
+- Example configuration used during testing:
+  - Network SSID: Mobile Hotspot (bypasses enterprise Wi-Fi client isolation)
+  - Host PC IP Address: 10.46.65.213 (Server Address)
+  - FaceGo Terminal IP Address: 10.46.65.45
+
+--------------------------------------------------------------------------------
+2. USB CONFIGURATION METHOD (RECOMMENDED)
+--------------------------------------------------------------------------------
+If you have a FAT32-formatted USB flash drive, you can edit and import the settings 
+directly:
+
+1. Insert the USB drive into the FaceGo terminal.
+2. In the terminal menu, export the system config files to USB (this generates a 
+   file named "sys.dat" on your flash drive).
+3. Insert the USB drive into your computer.
+4. Extract or locate "mnt/data/user.ini" inside the configuration directory on 
+   the USB.
+5. Open "user.ini" in a text editor (like Notepad) and verify/change the following 
+   parameters to point to your PC's IP address:
+   
+   hostaddress=10.46.65.213
+   hosturl=@ByteArray(10.46.65.213:5000/api/scan)
+
+6. Save the file, insert the USB drive back into the FaceGo terminal, and use 
+   the terminal menu to IMPORT the configuration from USB.
+7. Restart the terminal.
+
+--------------------------------------------------------------------------------
+3. MANUAL MENU CONFIGURATION ON THE DEVICE
+--------------------------------------------------------------------------------
+To configure the terminal settings manually using the screen and buttons:
+
+1. Press [M/OK] on the device panel to open the Main Menu.
+2. Navigate to COMM (Communications) -> Network Settings:
+   - IP Address: Set to a unique IP in your subnet (e.g., 10.46.65.45)
+   - Subnet Mask: Set to match your network (usually 255.255.255.0)
+   - Default Gateway: Set to your router's IP (e.g., 10.46.65.210)
+3. Navigate to COMM -> Web Server Settings / Network Push Options:
+   - Server IP/Address: Set to the Host PC IP Address (e.g., 10.46.65.213)
+   - Server Port: Set to 9920 (for direct TCP logs push)
+   - URL Path: Set to "/api/scan"
+     * NOTE: Do NOT include the full IP address or port in the URL Path menu,
+       as the device generates the full request path dynamically using the
+       configured Server IP and Port.
+   - Heartbeat Interval: Set to 30 seconds.
+
+--------------------------------------------------------------------------------
+4. WINDOWS FIREWALL CONFIGURATION
+--------------------------------------------------------------------------------
+To ensure incoming packets from the FaceGo device are not blocked by the host PC, 
+you must open the required ports in Windows Defender Firewall:
+
+1. Press Win + R, type "wf.msc" and press Enter to open Windows Advanced Firewall.
+2. Click "Inbound Rules" on the left menu.
+3. Click "New Rule..." on the right menu.
+4. Set the Rule Type to "Port" -> Protocol "TCP" -> Specific Ports: "5000, 9920, 80".
+5. Choose "Allow the connection", tick Domain, Private, and Public profiles, 
+   and name it "FaceGo Middleware TCP".
+6. Repeat the process to create a second Inbound Rule for Protocol "UDP" -> 
+   Specific Ports: "9924" (allows device status heartbeats), and name it 
+   "FaceGo Status UDP".
+
+--------------------------------------------------------------------------------
+5. VERIFICATION & RUNNING
+--------------------------------------------------------------------------------
+1. Start the integration server by running this command in the project directory:
+   npm run dev
+2. Open http://localhost:5000 in your web browser. 
+3. Check the connection indicator in the top right corner of the dashboard. It 
+   should display a green dot showing "Live Connected".
+4. Present a registered face to the scanner. The physical screen on the scanner 
+   will display "Verify Success", and the browser window will instantly load the 
+   employee's payroll balances and payout options.
+
+--------------------------------------------------------------------------------
+6. TROUBLESHOOTING
+--------------------------------------------------------------------------------
+- Device shows Wi-Fi status symbol with a red 'X':
+  -> The device cannot reach the network gateway. Double-check the Wi-Fi password 
+     and verify the Subnet Mask and Gateway settings in the COMM menu.
+- Terminal says "Verify Success" but browser UI does not update:
+  -> Check the Server Console terminal. If you see the message "Identify Success",
+     re-refresh the browser tab. The backend cache will automatically synchronize
+     and load the last scan within 30 seconds.
+  -> If you do not see any connection logs, check the Server IP address configured 
+     on the scanner.
+================================================================================
