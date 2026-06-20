@@ -3,6 +3,7 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const net = require('net'); // Native Node.js TCP module
 const { Server } = require('socket.io');
 
 const app = express();
@@ -14,39 +15,26 @@ const io = new Server(server, {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+// Port configuration
+const WEB_PORT = process.env.PORT || 5000;
+const HANVON_TCP_PORT = 9920; // Dedicated port for the Hanvon Device
+
 const DB_PATH = path.join(__dirname, 'erp_db.json');
 const LOG_PATH = path.join(__dirname, 'transactions.json');
 
-app.use(cors());
-// Global request logger for debugging network connectivity
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip || req.socket.remoteAddress}`);
-  next();
-});
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// Support text/xml and application/xml payloads by loading them as raw text
-app.use(express.text({ type: ['*/xml', 'text/xml', 'application/xml'] }));
-// Support default paths pushed by Hanvon devices (e.g. /, /post, /receivelog.do, etc.) by rewriting them to /api/scan
-app.use((req, res, next) => {
-  if (req.method === 'POST') {
-    const defaultPaths = ['/', '/post', '/receivelog.do', '/receivelogs.do', '/api/post', '/api/receivelog'];
-    if (defaultPaths.includes(req.path)) {
-      console.log(`[URL Rewrite] Intercepted POST to ${req.path}. Rewriting URL to /api/scan to accommodate device default push path.`);
-      req.url = '/api/scan';
-    }
-  }
-  next();
-});
-app.use(express.static(path.join(__dirname, 'public')));
+let activeScanSession = null; // Stores the latest scan to sync clients who connect shortly after the scan
 
-// Helper to read ERP database
+// --- INITIALIZE FILE DATABASES ---
+if (!fs.existsSync(DB_PATH)) {
+  fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2), 'utf8');
+}
+if (!fs.existsSync(LOG_PATH)) {
+  fs.writeFileSync(LOG_PATH, JSON.stringify([], null, 2), 'utf8');
+}
+
+// --- HELPER FUNCTIONS ---
 function readERPDatabase() {
   try {
-    if (!fs.existsSync(DB_PATH)) {
-      return [];
-    }
     const data = fs.readFileSync(DB_PATH, 'utf8');
     return JSON.parse(data);
   } catch (error) {
@@ -55,7 +43,6 @@ function readERPDatabase() {
   }
 }
 
-// Helper to write ERP database
 function writeERPDatabase(data) {
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
@@ -64,12 +51,8 @@ function writeERPDatabase(data) {
   }
 }
 
-// Helper to read transactions
 function readTransactions() {
   try {
-    if (!fs.existsSync(LOG_PATH)) {
-      return [];
-    }
     const data = fs.readFileSync(LOG_PATH, 'utf8');
     return JSON.parse(data);
   } catch (error) {
@@ -78,7 +61,6 @@ function readTransactions() {
   }
 }
 
-// Helper to write transactions
 function writeTransactions(data) {
   try {
     fs.writeFileSync(LOG_PATH, JSON.stringify(data, null, 2), 'utf8');
@@ -87,15 +69,36 @@ function writeTransactions(data) {
   }
 }
 
-// Initialize files if they don't exist
-if (!fs.existsSync(LOG_PATH)) {
-  writeTransactions([]);
-}
+// --- EXPRESS MIDDLEWARES ---
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.text({ type: ['*/xml', 'text/xml', 'application/xml'] }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// API: Get all employees (for Simulator dropdown)
+// Global Request Logger for HTTP/Express routes
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] HTTP: ${req.method} ${req.url} - IP: ${req.ip || req.socket.remoteAddress}`);
+  next();
+});
+
+// URL Rewrite Middleware for backup HTTP pushes
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    const defaultPaths = ['/', '/post', '/receivelog.do', '/receivelogs.do', '/api/post', '/api/receivelog'];
+    if (defaultPaths.includes(req.path)) {
+      console.log(`[URL Rewrite] Intercepted POST to ${req.path}. Rewriting to /api/scan`);
+      req.url = '/api/scan';
+    }
+  }
+  next();
+});
+
+// --- HTTP ENDPOINTS (WEB FRONTEND & MISC) ---
+
+// API: Get all employees
 app.get('/api/employees', (req, res) => {
-  const employees = readERPDatabase();
-  res.json(employees);
+  res.json(readERPDatabase());
 });
 
 // API: Add/Update mock employee
@@ -106,10 +109,10 @@ app.post('/api/employees', (req, res) => {
   }
 
   const employees = readERPDatabase();
-  const index = employees.findIndex(emp => emp.id === id);
+  const index = employees.findIndex(emp => emp.id.toString() === id.toString());
 
   const employeeData = {
-    id,
+    id: id.toString(),
     name,
     designation: designation || 'Employee',
     department: department || 'General',
@@ -133,95 +136,18 @@ app.post('/api/employees', (req, res) => {
 
 // API: Get transaction log
 app.get('/api/transactions', (req, res) => {
-  const transactions = readTransactions();
-  res.json(transactions);
+  res.json(readTransactions());
 });
 
-// API: Clear transactions (for testing/resetting)
+// API: Clear transactions
 app.post('/api/transactions/clear', (req, res) => {
   writeTransactions([]);
   res.json({ success: true });
 });
 
-// Hanvon Push HTTP POST Endpoint
-// Configure the Hanvon device to push to: http://<server-ip>:5000/api/scan
-app.post('/api/scan', (req, res) => {
-  console.log('--- Received Hanvon Scan Event ---');
-  console.log('Content-Type:', req.headers['content-type']);
-  console.log('Raw Payload:', req.body);
-
-  let payload = {};
-
-  // Parse payload if it's XML (either content-type matches or the body string starts with XML markup)
-  if (typeof req.body === 'string' && (req.body.trim().startsWith('<') || req.headers['content-type']?.includes('xml'))) {
-    try {
-      const xmlStr = req.body;
-      const getXmlTag = (tag) => {
-        const regex = new RegExp(`<${tag}>([^<]+)</${tag}>`, 'i');
-        const match = xmlStr.match(regex);
-        return match ? match[1].trim() : null;
-      };
-
-      payload = {
-        UserID: getXmlTag('UserID') || getXmlTag('id') || getXmlTag('userid'),
-        DeviceID: getXmlTag('DeviceID') || getXmlTag('deviceid'),
-        VerifyMode: getXmlTag('VerifyMode') || getXmlTag('verifymode'),
-        Time: getXmlTag('Time') || getXmlTag('time')
-      };
-      console.log('Parsed XML Payload:', payload);
-    } catch (err) {
-      console.error('Error parsing XML payload:', err);
-    }
-  } else {
-    // Already parsed as JSON or urlencoded object
-    payload = req.body || {};
-  }
-
-  // Hanvon devices typically send "UserID" or "id". We accommodate both.
-  const employeeId = payload.UserID || payload.id || payload.userid;
-  const deviceId = payload.DeviceID || payload.deviceid || 'Unknown Device';
-  const verifyMode = payload.VerifyMode || payload.verifymode || 'Face';
-  const time = payload.Time || payload.time || new Date().toISOString();
-
-  if (!employeeId) {
-    console.error('Scan failed: No UserID/employeeId in payload');
-    io.emit('scan-error', { message: 'Received empty employee ID from terminal' });
-    return res.status(400).json({ result: 'fail', error: 'Missing UserID' });
-  }
-
-  const employees = readERPDatabase();
-  const employee = employees.find(emp => emp.id.toString() === employeeId.toString());
-
-  if (employee) {
-    console.log(`Scan Succeeded: Employee ${employee.name} (${employee.id}) identified.`);
-    // Broadcast the scanned employee profile to all connected UI clients in real-time
-    io.emit('employee-scanned', {
-      employee,
-      meta: {
-        deviceId,
-        verifyMode,
-        time
-      }
-    });
-    res.status(200).json({ result: 'success' });
-  } else {
-    console.warn(`Scan Warning: Employee ID ${employeeId} not found in ERP database.`);
-    io.emit('employee-not-found', {
-      id: employeeId,
-      meta: {
-        deviceId,
-        verifyMode,
-        time
-      }
-    });
-    res.status(200).json({ result: 'success', message: 'Employee ID not in local DB' });
-  }
-});
-
 // API: Execute payout
 app.post('/api/pay', (req, res) => {
   const { employeeId, type } = req.body;
-
   if (!employeeId || !type) {
     return res.status(400).json({ error: 'employeeId and type are required' });
   }
@@ -238,55 +164,333 @@ app.post('/api/pay', (req, res) => {
     return res.status(404).json({ error: 'Employee not found' });
   }
 
-  // Securely get the amount from ERP database on backend, do not rely on client values
   const amount = employee[type];
-
-  // In a real application, you would connect to the ERP SOAP/REST API to register the payout here.
   console.log(`Executing payment for ${employee.name}: Type: ${type}, Amount: ${amount}`);
 
-  // Log the transaction
+  // Save payout event to transactions
   const transactions = readTransactions();
-  const newTransaction = {
-    transactionId: `TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-    timestamp: new Date().toISOString(),
+  transactions.push({
+    id: Date.now().toString(),
     employeeId: employee.id,
     employeeName: employee.name,
-    type,
-    amount,
-    status: 'SUCCESS'
-  };
-
-  transactions.unshift(newTransaction); // Add to beginning of log
+    type: `PAYOUT_${type.toUpperCase()}`,
+    amount: amount,
+    timestamp: new Date().toISOString()
+  });
   writeTransactions(transactions);
 
-  // Optionally update employee balance (e.g. set OT to 0 after paying, or reduce balance)
-  // For demonstration, let's keep them as is or reset OT/dorm_charge to 0, which is logical!
-  if (type === 'ot' || type === 'dorm_charge') {
-    employee[type] = 0.00;
-    writeERPDatabase(employees);
-    // Broadcast updated profile to UI if the employee is still active
-    io.emit('employee-updated', { employee });
+  // Clear active scan session since payment is done
+  activeScanSession = null;
+
+  res.json({ success: true, employeeName: employee.name, type, amount });
+});
+
+// API Fallback: Handle standard HTTP POST scans (if device uses HTTP engine)
+app.post('/api/scan', (req, res) => {
+  console.log('--- Received HTTP Hanvon Scan Event ---');
+  let payload = typeof req.body === 'string' ? {} : (req.body || {});
+
+  if (typeof req.body === 'string') {
+    const xmlStr = req.body;
+    const getXmlTag = (tag) => {
+      const regex = new RegExp(`<${tag}>([^<]+)</${tag}>`, 'i');
+      const match = xmlStr.match(regex);
+      return match ? match[1].trim() : null;
+    };
+    payload = {
+      UserID: getXmlTag('UserID') || getXmlTag('id'),
+      DeviceID: getXmlTag('DeviceID'),
+      VerifyMode: getXmlTag('VerifyMode'),
+      Time: getXmlTag('Time')
+    };
   }
 
-  res.json({
-    success: true,
-    transaction: newTransaction
+  const employeeId = payload.UserID || payload.id;
+  if (!employeeId) {
+    return res.status(400).json({ result: 'fail', error: 'Missing UserID' });
+  }
+
+  processLogData(employeeId, payload.DeviceID || 'HTTP-Device', payload.VerifyMode || 'Face', payload.Time || new Date().toISOString());
+  res.status(200).json({ result: 'success' });
+});
+
+
+// --- NEW: DEDICATED HANVON TCP SOCKET SERVER ---
+// const hanvonTcpServer = net.createServer((socket) => {
+//   console.log(`[TCP] Hanvon Device Connected from: ${socket.remoteAddress}:${socket.remotePort}`);
+
+//   socket.on('data', (data) => {
+//     const rawString = data.toString('utf8');
+//     console.log('[TCP] Raw String Received from Device:\n', rawString);
+
+//     // 1. Process Heartbeat Ping immediately to maintain live uplink
+//     if (rawString.includes('<HeartBeat>') || rawString.toLowerCase().includes('heartbeat')) {
+//       console.log('[TCP] Device Heartbeat detected. Acknowledging client link...');
+//       socket.write('Return(Result="Success")\r\n');
+//       return;
+//     }
+
+//     // 2. Parse out XML payload variables from the text frame
+//     try {
+//       const getXmlTag = (tag) => {
+//         const regex = new RegExp(`<${tag}>([^<]+)</${tag}>`, 'i');
+//         const match = rawString.match(regex);
+//         return match ? match[1].trim() : null;
+//       };
+
+//       const employeeId = getXmlTag('UserID') || getXmlTag('id') || getXmlTag('userid');
+//       const deviceId = getXmlTag('DeviceID') || 'FaceGo-Terminal';
+//       const verifyMode = getXmlTag('VerifyMode') || 'Face';
+//       const timestamp = getXmlTag('Time') || new Date().toISOString();
+
+//       if (employeeId) {
+//         console.log(`[TCP] Processing validation packet for Employee ID: ${employeeId}`);
+//         processLogData(employeeId, deviceId, verifyMode, timestamp);
+
+//         // CRITICAL: Tells Hanvon device that log was saved so it can clear its buffer memory
+//         socket.write('Return(Result="Success")\r\n');
+//       } else {
+//         socket.write('Return(Result="Success")\r\n');
+//       }
+//     } catch (err) {
+//       console.error('[TCP] Error Parsing Frame Data:', err);
+//       socket.write('Return(Result="Fail")\r\n');
+//     }
+//   });
+
+//   socket.on('error', (err) => {
+//     console.error('[TCP] Device Connection Interrupted:', err.message);
+//   });
+// });
+// --- UPDATED: HANVON TCP SOCKET SERVER ---
+// const hanvonTcpServer = net.createServer((socket) => {
+//   console.log(`[TCP] Hanvon Device Connected from: ${socket.remoteAddress}:${socket.remotePort}`);
+
+//   socket.on('data', (data) => {
+//     const rawString = data.toString('utf8').trim();
+//     console.log('[TCP] Raw String Received from Device:\n', rawString);
+
+//     // 1. Process Heartbeat Ping immediately to maintain live uplink
+//     if (rawString.includes('<HeartBeat>') || rawString.toLowerCase().includes('heartbeat')) {
+//       console.log('[TCP] Device Heartbeat detected. Acknowledging client link...');
+//       socket.write('Return(Result="Success")\r\n');
+//       return;
+//     }
+
+//     // 2. Handle Custom Hanvon Function Pushes (PostRecord / PostEmployee)
+//     try {
+//       // Regular expression to catch key="value" pattern inside functions
+//       const extractParam = (paramName) => {
+//         const regex = new RegExp(`${paramName}="([^"]+)"`, 'i');
+//         const match = rawString.match(regex);
+//         return match ? match[1].trim() : null;
+//       };
+
+//       const serialNumber = extractParam('sn');
+//       const employeeId = extractParam('id') || extractParam('UserID');
+//       const timeString = extractParam('time') || new Date().toISOString();
+
+//       // If it's a structural request missing an ID, acknowledge it so the buffer clears
+//       if (rawString.startsWith('PostRecord') || rawString.startsWith('PostEmployee')) {
+//         console.log(`[TCP] Intercepted Hanvon Device Hook (SN: ${serialNumber || 'Unknown'})`);
+
+//         if (employeeId) {
+//           console.log(`[TCP] Processing data for Employee ID: ${employeeId}`);
+//           processLogData(employeeId, serialNumber || 'FaceGo-Terminal', 'Face', timeString);
+//         } else {
+//           console.log('[TCP] Structural packet metadata acknowledged without active payload ID.');
+//         }
+
+//         // CRITICAL: Tells Hanvon device that function block was received so it clears device buffer memory
+//         socket.write('Return(Result="Success")\r\n');
+//         return;
+//       }
+
+//       // 3. Fallback: Parse out standard XML structures if the device changes format
+//       const getXmlTag = (tag) => {
+//         const regex = new RegExp(`<${tag}>([^<]+)</${tag}>`, 'i');
+//         const match = rawString.match(regex);
+//         return match ? match[1].trim() : null;
+//       };
+
+//       const xmlEmployeeId = getXmlTag('UserID') || getXmlTag('id');
+//       const xmlDeviceId = getXmlTag('DeviceID') || 'FaceGo-Terminal';
+//       const xmlTime = getXmlTag('Time') || new Date().toISOString();
+
+//       if (xmlEmployeeId) {
+//         console.log(`[TCP] Processing XML validation packet for Employee ID: ${xmlEmployeeId}`);
+//         processLogData(xmlEmployeeId, xmlDeviceId, 'Face', xmlTime);
+//         socket.write('Return(Result="Success")\r\n');
+//       } else {
+//         // Fallback catch-all to prevent terminal processing loops
+//         socket.write('Return(Result="Success")\r\n');
+//       }
+
+//     } catch (err) {
+//       console.error('[TCP] Error Parsing Frame Data:', err);
+//       socket.write('Return(Result="Fail")\r\n');
+//     }
+//   });
+
+//   socket.on('error', (err) => {
+//     console.error('[TCP] Device Connection Interrupted:', err.message);
+//   });
+// });
+// --- UPDATED FIXED: HANVON TCP SOCKET SERVER ---
+const hanvonTcpServer = net.createServer((socket) => {
+  console.log(`[TCP] Hanvon Device Connected from: ${socket.remoteAddress}:${socket.remotePort}`);
+
+  socket.on('data', (data) => {
+    const rawString = data.toString('utf8').trim();
+    console.log('[TCP] Raw String Received from Device:\n', rawString);
+
+    // 1. Process Heartbeat Ping immediately to maintain live uplink
+    if (rawString.includes('<HeartBeat>') || rawString.toLowerCase().includes('heartbeat')) {
+      console.log('[TCP] Device Heartbeat detected. Acknowledging client link...');
+      socket.write('Return(result="success")\r\n');
+      return;
+    }
+
+    try {
+      // Regular expression to catch key="value" pattern inside standard strings
+      const extractParam = (paramName) => {
+        const regex = new RegExp(`${paramName}="([^"]+)"`, 'i');
+        const match = rawString.match(regex);
+        return match ? match[1].trim() : null;
+      };
+
+      // A. Handle "PostRecord" Handshake (Initial Device Connection Check)
+      if (rawString.startsWith('PostRecord')) {
+        const serialNumber = extractParam('sn');
+        console.log(`[TCP] Handshake Received: PostRecord from Device SN: ${serialNumber}`);
+        // CRITICAL FIX: Explicitly tell device if you want it to push verification photos
+        socket.write('Return(result="success" postphoto="false")\r\n');
+        return;
+      }
+
+      // B. Handle "PostEmployee" Handshake
+      if (rawString.startsWith('PostEmployee')) {
+        const serialNumber = extractParam('sn');
+        console.log(`[TCP] Handshake Received: PostEmployee from Device SN: ${serialNumber}`);
+        socket.write('Return(result="success")\r\n');
+        return;
+      }
+
+      // C. Handle Incoming Attendance "Record" Upload strings
+      if (rawString.startsWith('Record') || rawString.includes('id=')) {
+        const employeeId = extractParam('id') || extractParam('UserID');
+        const timeString = extractParam('time') || new Date().toISOString();
+        const serialNumber = extractParam('sn') || 'FaceGo-Terminal';
+
+        if (employeeId) {
+          console.log(`[TCP] Processing log record for Employee ID: ${employeeId}`);
+          processLogData(employeeId, serialNumber, 'Face', timeString);
+        }
+
+        socket.write('Return(result="success")\r\n');
+        return;
+      }
+
+      // 3. Fallback: Parse out standard XML structures if device falls back to XML text formatting
+      const getXmlTag = (tag) => {
+        const regex = new RegExp(`<${tag}>([^<]+)</${tag}>`, 'i');
+        const match = rawString.match(regex);
+        return match ? match[1].trim() : null;
+      };
+
+      const xmlEmployeeId = getXmlTag('UserID') || getXmlTag('id');
+      const xmlDeviceId = getXmlTag('DeviceID') || 'FaceGo-Terminal';
+      const xmlTime = getXmlTag('Time') || new Date().toISOString();
+
+      if (xmlEmployeeId) {
+        console.log(`[TCP] Processing XML validation packet for Employee ID: ${xmlEmployeeId}`);
+        processLogData(xmlEmployeeId, xmlDeviceId, 'Face', xmlTime);
+        socket.write('Return(result="success")\r\n');
+      } else {
+        // Universal lowercase fallback reply to keep loop clear
+        socket.write('Return(result="success")\r\n');
+      }
+
+    } catch (err) {
+      console.error('[TCP] Error Parsing Frame Data:', err);
+      socket.write('Return(result="fail")\r\n');
+    }
+  });
+
+  socket.on('error', (err) => {
+    console.error('[TCP] Device Connection Interrupted:', err.message);
   });
 });
 
-// Socket connection management
+
+// --- SHARED DATA HOOK FOR BROADCASTING & SAVING LOGS ---
+function processLogData(employeeId, deviceId, verifyMode, timestamp) {
+  const employees = readERPDatabase();
+  const employee = employees.find(emp => emp.id.toString() === employeeId.toString());
+
+  if (employee) {
+    console.log(`[Success] Identified Employee: ${employee.name} (ID: ${employee.id})`);
+
+    // Add entry to transactions database
+    const transactions = readTransactions();
+    transactions.push({
+      id: Date.now().toString() + Math.floor(Math.random() * 1000),
+      employeeId: employee.id,
+      employeeName: employee.name,
+      type: 'SCAN_IN',
+      deviceId,
+      verifyMode,
+      timestamp
+    });
+    writeTransactions(transactions);
+
+    // Save active scan session with a millisecond timestamp for reconnection syncing
+    activeScanSession = {
+      employee,
+      meta: { deviceId, verifyMode, time: timestamp },
+      timestamp: Date.now()
+    };
+
+    // Fire live payload down to connected dashboard browser instances
+    io.emit('employee-scanned', {
+      employee,
+      meta: { deviceId, verifyMode, time: timestamp }
+    });
+  } else {
+    console.warn(`[Warning] Scanned ID ${employeeId} doesn't exist in erp_db.json`);
+
+    io.emit('employee-not-found', {
+      id: employeeId,
+      meta: { deviceId, verifyMode, time: timestamp }
+    });
+  }
+}
+
+// --- SOCKET.IO CLIENT CONN MANAGER ---
 io.on('connection', (socket) => {
-  console.log(`Socket client connected: ${socket.id}`);
+  console.log(`[UI Client Connected] Active Socket Token: ${socket.id}`);
   
+  // If there is a fresh active scan session (under 30s), send it to the connecting UI client immediately
+  if (activeScanSession && (Date.now() - activeScanSession.timestamp < 30000)) {
+    console.log(`[UI Client Connected] Syncing active scan session for ${activeScanSession.employee.name}`);
+    socket.emit('employee-scanned', activeScanSession);
+  }
+
+  socket.on('clear-active-scan', () => {
+    console.log(`[UI Client] Cleared active scan session`);
+    activeScanSession = null;
+  });
+
   socket.on('disconnect', () => {
-    console.log(`Socket client disconnected: ${socket.id}`);
+    console.log(`[UI Client Disconnected] Left Server context.`);
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(` Hanvon FaceID Payroll Integration Middleware Running  `);
-  console.log(` Server local address: http://localhost:${PORT}        `);
-  console.log(` Hanvon API push endpoint: http://localhost:${PORT}/api/scan`);
-  console.log(`=======================================================`);
+// --- LAUNCH SIMULTANEOUS PORTS ---
+server.listen(WEB_PORT, () => {
+  console.log(`💻 Web Dashboard Engine online at: http://localhost:${WEB_PORT}`);
+});
+
+hanvonTcpServer.listen(HANVON_TCP_PORT, () => {
+  console.log(`🚀 Hanvon FaceGo Push Server listening on TCP Port: ${HANVON_TCP_PORT}`);
 });

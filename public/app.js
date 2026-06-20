@@ -131,6 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         stateIdle.classList.add('active');
         currentEmployee = null;
         selectedPayoutType = null;
+        if (socket && socket.connected) {
+          socket.emit('clear-active-scan');
+        }
         break;
 
       case 'PROFILE':
@@ -221,7 +224,28 @@ document.addEventListener('DOMContentLoaded', () => {
     empSection.textContent = currentEmployee.section;
     empUnit.textContent = currentEmployee.unit;
     empShift.textContent = currentEmployee.shift;
-    scanMetaDevice.textContent = `Verified by terminal: ${data.meta.deviceId} at ${new Date(data.meta.time).toLocaleTimeString()}`;
+
+    let timeFormatted = '';
+    try {
+      const parsedDate = new Date(data.meta.time);
+      if (!isNaN(parsedDate.getTime())) {
+        timeFormatted = parsedDate.toLocaleTimeString();
+      } else {
+        // Fallback for space/dash formatting issues (e.g. Safari compatibility)
+        const compatDate = new Date(data.meta.time.replace(/-/g, '/'));
+        if (!isNaN(compatDate.getTime())) {
+          timeFormatted = compatDate.toLocaleTimeString();
+        } else {
+          // Just extract the time part: "17:42:30"
+          const match = data.meta.time.match(/(\d{2}:\d{2}:\d{2})/);
+          timeFormatted = match ? match[1] : data.meta.time;
+        }
+      }
+    } catch (e) {
+      timeFormatted = new Date().toLocaleTimeString();
+    }
+
+    scanMetaDevice.textContent = `Verified by terminal: ${data.meta.deviceId} at ${timeFormatted}`;
 
     // Switch view
     transitionTo('PROFILE');
