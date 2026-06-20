@@ -1,51 +1,65 @@
-// ==========================================================================
-// APPLICATION INITIALIZATION & STATE MANAGEMENT
-// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // App variables
+  // Global State
   let currentEmployee = null;
   let activeState = 'IDLE'; // IDLE, PROFILE, CONFIRM, SUCCESS, ERROR
   let selectedPayoutType = null; // salary, ot, dorm_charge
-  
+  let allTransactions = [];
+  let allEmployees = [];
+
   // Timers
   let inactivityTimer = null;
   let warningTimer = null;
   let successCountdownTimer = null;
-  
-  const INACTIVITY_LIMIT = 20000; // 20 seconds before alert
-  const WARNING_LIMIT = 10; // 10 seconds warning countdown
+  const INACTIVITY_LIMIT = 20000; // 20s
+  const WARNING_LIMIT = 10; // 10s
 
-  // DOM Elements - Navigation & Connection
+  // DOM Elements - Connection & Status
   const connectionStatus = document.getElementById('connection-status');
+  const connectionDot = document.getElementById('connection-dot');
+  const connectionText = document.getElementById('connection-text');
   const liveClock = document.getElementById('live-clock');
+  const currentBreadcrumb = document.getElementById('current-breadcrumb');
 
-  // DOM Elements - Kiosk State Screens
+  // DOM Elements - Tabs
+  const menuItems = document.querySelectorAll('.menu-item');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  // DOM Elements - Kiosk Screens
   const stateIdle = document.getElementById('state-idle');
   const stateProfile = document.getElementById('state-profile');
   const stateConfirm = document.getElementById('state-confirm');
   const stateSuccess = document.getElementById('state-success');
   const stateError = document.getElementById('state-error');
 
-  // DOM Elements - Employee Profile Card
-  const empInitials = document.getElementById('emp-initials');
+  // DOM Elements - Kiosk Profile Details
   const empName = document.getElementById('emp-name');
-  const empIdBadge = document.getElementById('emp-id');
+  const empId = document.getElementById('emp-id');
   const empDesignation = document.getElementById('emp-designation');
   const empDepartment = document.getElementById('emp-department');
   const empSection = document.getElementById('emp-section');
-  const empUnit = document.getElementById('emp-unit');
   const empShift = document.getElementById('emp-shift');
+  const empUnit = document.getElementById('emp-unit');
   const scanMetaDevice = document.getElementById('scan-meta-device');
+
+  // DOM Elements - Payout Buttons
+  const empSalary = document.getElementById('emp-salary');
+  const empOt = document.getElementById('emp-ot');
+  const empDorm = document.getElementById('emp-dorm');
+  const cardPaySalary = document.getElementById('card-pay-salary');
+  const cardPayOt = document.getElementById('card-pay-ot');
+  const cardPayDorm = document.getElementById('card-pay-dorm');
+  const btnCancelSession = document.getElementById('btn-cancel-session');
 
   // DOM Elements - Confirm Dialog
   const confPayoutTitle = document.getElementById('conf-payout-title');
   const confAmount = document.getElementById('conf-amount');
   const confEmpName = document.getElementById('conf-emp-name');
-  const confEmpIdBadge = document.getElementById('conf-emp-id');
+  const confEmpId = document.getElementById('conf-emp-id');
   const btnExecutePay = document.getElementById('btn-execute-pay');
   const btnCancelPay = document.getElementById('btn-cancel-pay');
+  const paySpinner = document.getElementById('pay-spinner');
 
-  // DOM Elements - Success Feedback
+  // DOM Elements - Success Screen
   const receiptTxnId = document.getElementById('receipt-txn-id');
   const receiptEmpName = document.getElementById('receipt-emp-name');
   const receiptAmount = document.getElementById('receipt-amount');
@@ -53,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetCounter = document.getElementById('reset-counter');
   const btnDonePayout = document.getElementById('btn-done-payout');
 
-  // DOM Elements - Error Feedback
+  // DOM Elements - Error Screen
   const errorMessage = document.getElementById('error-message');
   const errorScannedId = document.getElementById('error-scanned-id');
   const btnErrorReset = document.getElementById('btn-error-reset');
@@ -62,31 +76,47 @@ document.addEventListener('DOMContentLoaded', () => {
   const sessionTimeoutBanner = document.getElementById('session-timeout-banner');
   const timeoutSeconds = document.getElementById('timeout-seconds');
   const btnKeepSession = document.getElementById('btn-keep-session');
-  
-  // DOM Elements - Simulator Panel
-  const simulatorSidebar = document.getElementById('simulator-sidebar');
-  const btnToggleSim = document.getElementById('btn-toggle-sim');
-  const simEmployeeSelect = document.getElementById('sim-employee-select');
-  const simDeviceId = document.getElementById('sim-device-id');
-  const btnSimScan = document.getElementById('btn-sim-scan');
-  const simTransactionList = document.getElementById('sim-transaction-list');
-  const btnClearLogs = document.getElementById('btn-clear-logs');
-  
-  // DOM Elements - Simulator ERP Registry
-  const newEmpId = document.getElementById('new-emp-id');
-  const newEmpName = document.getElementById('new-emp-name');
-  const newEmpDesig = document.getElementById('new-emp-desig');
-  const newEmpDept = document.getElementById('new-emp-dept');
-  const newEmpSalary = document.getElementById('new-emp-salary');
-  const newEmpOt = document.getElementById('new-emp-ot');
-  const btnAddEmployee = document.getElementById('btn-add-employee');
+
+  // DOM Elements - Filters
+  const filterStartDate = document.getElementById('filter-start-date');
+  const filterEndDate = document.getElementById('filter-end-date');
+  const filterEmpId = document.getElementById('filter-emp-id');
+  const filterPayoutType = document.getElementById('filter-payout-type');
+  const btnClearFilters = document.getElementById('btn-clear-filters');
+
+  // DOM Elements - Metrics
+  const metricTxnCount = document.getElementById('metric-txn-count');
+  const metricTotalPaid = document.getElementById('metric-total-paid');
+  const metricSalaryPaid = document.getElementById('metric-salary-paid');
+  const metricOtPaid = document.getElementById('metric-ot-paid');
+  const metricDormPaid = document.getElementById('metric-dorm-paid');
+
+  // DOM Elements - Table Bodies
+  const payoutReportBody = document.getElementById('payout-report-body');
+  const registryListBody = document.getElementById('registry-list-body');
+
+  // DOM Elements - Employee Register Form
+  const regEmpId = document.getElementById('reg-emp-id');
+  const regEmpName = document.getElementById('reg-emp-name');
+  const regEmpDesig = document.getElementById('reg-emp-desig');
+  const regEmpDept = document.getElementById('reg-emp-dept');
+  const regEmpSalary = document.getElementById('reg-emp-salary');
+  const regEmpOt = document.getElementById('reg-emp-ot');
+  const btnRegisterEmployee = document.getElementById('btn-register-employee');
+
+  // DOM Elements - Toast Notifications
+  const toastNotification = document.getElementById('toast-notification');
+  const toastTitle = document.getElementById('toast-title');
+  const toastBody = document.getElementById('toast-body');
 
   // ==========================================================================
   // SYSTEM CLOCK & FORMATTERS
   // ==========================================================================
   function updateClock() {
-    const now = new Date();
-    liveClock.textContent = now.toLocaleTimeString();
+    if (liveClock) {
+      const now = new Date();
+      liveClock.textContent = now.toLocaleTimeString();
+    }
   }
   setInterval(updateClock, 1000);
   updateClock();
@@ -98,21 +128,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }).format(val);
   }
 
-  function getInitials(name) {
-    if (!name) return '??';
-    return name.split(' ')
-               .map(word => word[0])
-               .filter(char => /[a-zA-Z]/.test(char))
-               .slice(0, 2)
-               .join('')
-               .toUpperCase();
+  // Toast Notification Trigger
+  function showToast(title, message) {
+    toastTitle.textContent = title;
+    toastBody.textContent = message;
+    toastNotification.style.display = 'flex';
+    setTimeout(() => {
+      toastNotification.style.display = 'none';
+    }, 4000);
   }
 
   // ==========================================================================
-  // STATE MACHINE TRANSITIONS
+  // TAB NAVIGATION
+  // ==========================================================================
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const targetTab = item.getAttribute('data-tab-target');
+
+      // Update active menu link
+      menuItems.forEach(mi => mi.classList.remove('active'));
+      item.classList.add('active');
+
+      // Update active content tab
+      tabContents.forEach(tc => tc.classList.remove('active'));
+      document.getElementById(`tab-${targetTab}`).classList.add('active');
+
+      // Update breadcrumb
+      let breadcrumbText = 'FaceGo Kiosk Terminal';
+      if (targetTab === 'history') breadcrumbText = 'Payout History Log';
+      if (targetTab === 'registry') breadcrumbText = 'ERP Employee Registry';
+      currentBreadcrumb.textContent = breadcrumbText;
+
+      // Refresh data
+      if (targetTab === 'history') {
+        loadTransactions();
+      }
+      if (targetTab === 'registry') {
+        loadEmployees();
+      }
+    });
+  });
+
+  // ==========================================================================
+  // STATE MACHINE TRANSITIONS (KIOSK)
   // ==========================================================================
   function transitionTo(stateName) {
-    console.log(`Transitioning: ${activeState} -> ${stateName}`);
+    console.log(`Transitioning Kiosk: ${activeState} -> ${stateName}`);
     activeState = stateName;
 
     // Reset UI visibility
@@ -124,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearTimeout(inactivityTimer);
     clearInterval(warningTimer);
     clearTimeout(successCountdownTimer);
-    sessionTimeoutBanner.classList.add('hidden');
+    sessionTimeoutBanner.style.display = 'none';
 
     switch (stateName) {
       case 'IDLE':
@@ -163,24 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function startInactivityTimer() {
     clearTimeout(inactivityTimer);
     clearInterval(warningTimer);
-    sessionTimeoutBanner.classList.add('hidden');
+    sessionTimeoutBanner.style.display = 'none';
 
-    // Start primary countdown
     inactivityTimer = setTimeout(() => {
-      // Trigger warning banner
-      sessionTimeoutBanner.classList.remove('hidden');
+      // Show inactivity banner
+      sessionTimeoutBanner.style.display = 'flex';
       let countdown = WARNING_LIMIT;
       timeoutSeconds.textContent = countdown;
 
-      // Decrement countdown each second
       warningTimer = setInterval(() => {
         countdown--;
         timeoutSeconds.textContent = countdown;
 
         if (countdown <= 0) {
           clearInterval(warningTimer);
-          sessionTimeoutBanner.classList.add('hidden');
-          console.warn('Session timed out due to inactivity.');
+          sessionTimeoutBanner.style.display = 'none';
+          console.warn('Kiosk session timed out due to inactivity.');
           transitionTo('IDLE');
         }
       }, 1000);
@@ -188,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, INACTIVITY_LIMIT);
   }
 
-  // Reset timer on user clicks/activity inside the interactive zones
   btnKeepSession.addEventListener('click', () => {
     startInactivityTimer();
   });
@@ -200,30 +258,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   socket.on('connect', () => {
     console.log('Connected to server via WebSocket.');
-    connectionStatus.className = 'status-indicator online';
-    connectionStatus.querySelector('.status-text').textContent = 'Live Connected';
+    connectionDot.className = 'conn-status-dot online';
+    connectionText.textContent = 'Live Connected';
   });
 
   socket.on('disconnect', () => {
     console.warn('Disconnected from server.');
-    connectionStatus.className = 'status-indicator offline';
-    connectionStatus.querySelector('.status-text').textContent = 'Reconnecting...';
+    connectionDot.className = 'conn-status-dot offline';
+    connectionText.textContent = 'Reconnecting...';
   });
 
-  // Catch face scan event pushed by device
+  // Receive Face Scan Event
   socket.on('employee-scanned', (data) => {
     console.log('Real-time scan received:', data);
     currentEmployee = data.employee;
-    
-    // Fill profile card
-    empInitials.textContent = getInitials(currentEmployee.name);
+
+    // Fill Kiosk profile details
     empName.textContent = currentEmployee.name;
-    empIdBadge.textContent = currentEmployee.id;
+    empId.textContent = currentEmployee.id;
     empDesignation.textContent = currentEmployee.designation;
     empDepartment.textContent = currentEmployee.department;
-    empSection.textContent = currentEmployee.section;
-    empUnit.textContent = currentEmployee.unit;
-    empShift.textContent = currentEmployee.shift;
+    empSection.textContent = currentEmployee.section || 'General';
+    empShift.textContent = currentEmployee.shift || 'Day';
+    empUnit.textContent = currentEmployee.unit || 'Unit-1';
+
+    empSalary.textContent = formatCurrency(currentEmployee.salary);
+    empOt.textContent = formatCurrency(currentEmployee.ot);
+    empDorm.textContent = formatCurrency(currentEmployee.dorm_charge || 0);
 
     let timeFormatted = '';
     try {
@@ -231,12 +292,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isNaN(parsedDate.getTime())) {
         timeFormatted = parsedDate.toLocaleTimeString();
       } else {
-        // Fallback for space/dash formatting issues (e.g. Safari compatibility)
         const compatDate = new Date(data.meta.time.replace(/-/g, '/'));
         if (!isNaN(compatDate.getTime())) {
           timeFormatted = compatDate.toLocaleTimeString();
         } else {
-          // Just extract the time part: "17:42:30"
           const match = data.meta.time.match(/(\d{2}:\d{2}:\d{2})/);
           timeFormatted = match ? match[1] : data.meta.time;
         }
@@ -245,91 +304,63 @@ document.addEventListener('DOMContentLoaded', () => {
       timeFormatted = new Date().toLocaleTimeString();
     }
 
-    scanMetaDevice.textContent = `Verified by terminal: ${data.meta.deviceId} at ${timeFormatted}`;
+    scanMetaDevice.textContent = `Verified by FaceGo terminal (SN: ${data.meta.deviceId}) at ${timeFormatted} via ${data.meta.verifyMode || 'Face'}`;
 
+    showToast('Face Recognition Success', `${currentEmployee.name} scanned successfully.`);
+    
     // Switch view
     transitionTo('PROFILE');
   });
 
-  // Catch unregistered employee scan
+  // Receive unregistered employee warning
   socket.on('employee-not-found', (data) => {
-    console.warn('Employee ID scanned not found in ERP:', data.id);
-    errorMessage.textContent = 'This employee record could not be located in the central payroll ERP database.';
+    console.warn('Scanned ID not found:', data.id);
+    errorMessage.textContent = 'This scanned identifier was not found in the ERP database.';
     errorScannedId.textContent = data.id;
+    showToast('Verification Refused', `ID ${data.id} is unregistered.`);
     transitionTo('ERROR');
   });
 
-  // Catch live update of employee (after payout reset)
-  socket.on('employee-updated', (data) => {
-    if (currentEmployee && currentEmployee.id === data.employee.id) {
-      console.log('Employee values updated in real time.');
-      currentEmployee = data.employee;
-    }
-  });
-
   // ==========================================================================
-  // TRANSACTION SELECTION & CONFIRMATION
+  // TRANSACTION FLOW
   // ==========================================================================
   
-  // Exit Profile Session
-  document.getElementById('btn-cancel-session').addEventListener('click', () => {
+  // Cancel Session from profile card
+  btnCancelSession.addEventListener('click', () => {
     transitionTo('IDLE');
   });
 
-  // Click handler for Transaction type selectors
-  const actionButtons = document.querySelectorAll('.action-btn');
-  actionButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  // Select payout options
+  [
+    { card: cardPaySalary, type: 'salary', label: 'Base Salary Payout' },
+    { card: cardPayOt, type: 'ot', label: 'Overtime Payment' },
+    { card: cardPayDorm, type: 'dorm_charge', label: 'Dormitory Charge Payout' }
+  ].forEach(option => {
+    option.card.addEventListener('click', () => {
       if (!currentEmployee) return;
 
-      const type = btn.getAttribute('data-payout-type');
-      selectedPayoutType = type;
+      selectedPayoutType = option.type;
+      const amountVal = currentEmployee[option.type] || 0;
 
-      let typeLabel = '';
-      let amountVal = 0;
-      let icon = '';
-
-      switch (type) {
-        case 'salary':
-          typeLabel = 'Base Salary Payout';
-          amountVal = currentEmployee.salary;
-          icon = '💰';
-          break;
-        case 'ot':
-          typeLabel = 'Overtime Payment';
-          amountVal = currentEmployee.ot;
-          icon = '⚡';
-          break;
-        case 'dorm_charge':
-          typeLabel = 'Dormitory Charge Payout';
-          amountVal = currentEmployee.dorm_charge;
-          icon = '🏢';
-          break;
-      }
-
-      // Configure Confirm Page
-      document.getElementById('conf-type-icon').textContent = icon;
-      confPayoutTitle.textContent = typeLabel;
+      confPayoutTitle.textContent = option.label;
       confAmount.textContent = formatCurrency(amountVal);
       confEmpName.textContent = currentEmployee.name;
-      confEmpIdBadge.textContent = `ID: ${currentEmployee.id}`;
+      confEmpId.textContent = currentEmployee.id;
 
       transitionTo('CONFIRM');
     });
   });
 
-  // Cancel Confirmation
+  // Cancel pay confirmation
   btnCancelPay.addEventListener('click', () => {
     transitionTo('PROFILE');
   });
 
-  // Execute Payout Confirmation (Send to API Backend)
+  // Execute payment
   btnExecutePay.addEventListener('click', async () => {
     if (!currentEmployee || !selectedPayoutType) return;
-    
-    // Show spinner inside button
-    const spinner = btnExecutePay.querySelector('.btn-spinner');
-    spinner.classList.remove('hidden');
+
+    paySpinner.classList.remove('hidden');
     btnExecutePay.disabled = true;
     btnCancelPay.disabled = true;
 
@@ -346,52 +377,49 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const result = await response.json();
-      spinner.classList.add('hidden');
+      paySpinner.classList.add('hidden');
       btnExecutePay.disabled = false;
       btnCancelPay.disabled = false;
 
       if (response.ok && result.success) {
-        // Configure receipt details
+        // Setup receipt
         receiptTxnId.textContent = result.transaction.transactionId;
         receiptEmpName.textContent = result.transaction.employeeName;
-        receiptAmount.textContent = `BDT ${formatCurrency(result.transaction.amount)}`;
+        receiptAmount.textContent = `${formatCurrency(result.transaction.amount)} BDT`;
         
         let typeText = 'Base Salary';
         if (result.transaction.type === 'ot') typeText = 'Overtime Pay';
         if (result.transaction.type === 'dorm_charge') typeText = 'Dorm Charge';
         receiptType.textContent = typeText;
 
-        // Fetch logs for simulator
-        refreshTransactions();
-
-        // Switch to Success screen
+        showToast('Payment Successful', `Paid BDT ${formatCurrency(result.transaction.amount)} to ${result.transaction.employeeName}`);
         transitionTo('SUCCESS');
       } else {
-        errorMessage.textContent = result.error || 'The payment gateway returned an execution failure.';
+        errorMessage.textContent = result.error || 'The payment could not be executed.';
         errorScannedId.textContent = currentEmployee.id;
         transitionTo('ERROR');
       }
 
     } catch (err) {
-      console.error('API Payment request failed:', err);
-      spinner.classList.add('hidden');
+      console.error('Payment API call failed:', err);
+      paySpinner.classList.add('hidden');
       btnExecutePay.disabled = false;
       btnCancelPay.disabled = false;
-      errorMessage.textContent = 'Failed to establish network request to ERP API Gateway.';
+      errorMessage.textContent = 'Failed to connect to ERP API Gateway.';
       errorScannedId.textContent = currentEmployee.id;
       transitionTo('ERROR');
     }
   });
 
-  // Success Auto-Reset timer
+  // Success Reset countdown
   function startSuccessAutoReset(seconds) {
-    let countdown = seconds;
-    resetCounter.textContent = countdown;
+    let count = seconds;
+    resetCounter.textContent = count;
 
     successCountdownTimer = setTimeout(function tick() {
-      countdown--;
-      resetCounter.textContent = countdown;
-      if (countdown <= 0) {
+      count--;
+      resetCounter.textContent = count;
+      if (count <= 0) {
         transitionTo('IDLE');
       } else {
         successCountdownTimer = setTimeout(tick, 1000);
@@ -403,89 +431,241 @@ document.addEventListener('DOMContentLoaded', () => {
     transitionTo('IDLE');
   });
 
-  // Error screen dismissal
   btnErrorReset.addEventListener('click', () => {
     transitionTo('IDLE');
   });
 
   // ==========================================================================
-  // HARDWARE TERMINAL SIMULATOR CONTROLLERS
+  // PAYOUT HISTORY LOG REPORT
   // ==========================================================================
-  
-  // Sidebar Slide Toggle
-  btnToggleSim.addEventListener('click', () => {
-    simulatorSidebar.classList.toggle('open');
-  });
-
-  // Fetch employees list to populate simulator dropdown
-  async function loadSimulatorEmployees() {
+  async function loadTransactions() {
     try {
-      const res = await fetch('/api/employees');
-      const data = await res.json();
-      
-      simEmployeeSelect.innerHTML = '';
-      if (data.length === 0) {
-        simEmployeeSelect.innerHTML = '<option value="">No employees in database</option>';
-        return;
-      }
-
-      data.forEach(emp => {
-        const option = document.createElement('option');
-        option.value = emp.id;
-        option.textContent = `${emp.name} (ID: ${emp.id})`;
-        simEmployeeSelect.appendChild(option);
-      });
+      const res = await fetch('/api/transactions');
+      allTransactions = await res.json();
+      applyFilters();
     } catch (err) {
-      console.error('Error loading employees list:', err);
+      console.error('Error loading transactions:', err);
+      payoutReportBody.innerHTML = `<tr><td colspan="7" class="table-empty" style="color: var(--danger);">Failed to load transactions.</td></tr>`;
     }
   }
 
-  // Trigger Mock FaceID Scan Event (HTTP POST request mimicking terminal)
-  btnSimScan.addEventListener('click', async () => {
-    const userId = simEmployeeSelect.value;
-    const devId = simDeviceId.value || 'Simulator-Node-1';
-    
-    if (!userId) {
-      alert('Please select or add a mock employee first!');
+  function applyFilters() {
+    const startDateVal = filterStartDate.value;
+    const endDateVal = filterEndDate.value;
+    const empIdVal = filterEmpId.value.trim().toLowerCase();
+    const typeVal = filterPayoutType.value;
+
+    let filtered = allTransactions;
+
+    // 1. Filter by start date
+    if (startDateVal) {
+      const startLimit = new Date(startDateVal + 'T00:00:00');
+      filtered = filtered.filter(tx => new Date(tx.timestamp) >= startLimit);
+    }
+
+    // 2. Filter by end date
+    if (endDateVal) {
+      const endLimit = new Date(endDateVal + 'T23:59:59');
+      filtered = filtered.filter(tx => new Date(tx.timestamp) <= endLimit);
+    }
+
+    // 3. Filter by Employee ID
+    if (empIdVal) {
+      filtered = filtered.filter(tx => tx.employeeId.toString().toLowerCase().includes(empIdVal));
+    }
+
+    // 4. Filter by type
+    if (typeVal !== 'ALL') {
+      filtered = filtered.filter(tx => tx.type === typeVal);
+    }
+
+    renderReportTable(filtered);
+    calculateMetrics(filtered);
+  }
+
+  function renderReportTable(data) {
+    payoutReportBody.innerHTML = '';
+
+    if (data.length === 0) {
+      payoutReportBody.innerHTML = `<tr><td colspan="7" class="table-empty">No transactions match the selected filters.</td></tr>`;
       return;
     }
 
-    try {
-      // Mimic exactly the Hanvon push protocol
-      const response = await fetch('/api/scan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          UserID: userId,
-          DeviceID: devId,
-          VerifyMode: 'Face',
-          Time: new Date().toISOString()
-        })
-      });
+    data.forEach(tx => {
+      const tr = document.createElement('tr');
+      const dateStr = new Date(tx.timestamp).toLocaleString();
+      
+      let typeLabel = 'Base Salary';
+      if (tx.type === 'ot') typeLabel = 'Overtime';
+      if (tx.type === 'dorm_charge') typeLabel = 'Dorm Charge';
+      if (tx.payoutType?.includes('OT')) typeLabel = 'Overtime';
+      if (tx.payoutType?.includes('DORM')) typeLabel = 'Dorm Charge';
 
-      if (!response.ok) {
-        console.error('Simulator push failed:', response.status);
+      let statusClass = 'success';
+      let statusLabel = 'PAID';
+      if (tx.type === 'SCAN_IN') {
+        statusClass = 'scan';
+        statusLabel = 'SCAN IN';
+        typeLabel = 'Attendance Log';
       }
-    } catch (err) {
-      console.error('Simulator post failed:', err);
-    }
+
+      tr.innerHTML = `
+        <td class="font-mono">${tx.transactionId || tx.id}</td>
+        <td>${dateStr}</td>
+        <td><strong>${tx.employeeId}</strong></td>
+        <td>${tx.employeeName}</td>
+        <td>${typeLabel}</td>
+        <td><strong style="color: ${tx.type === 'SCAN_IN' ? 'inherit' : 'var(--primary-blue)'};">${tx.type === 'SCAN_IN' ? '-' : formatCurrency(tx.amount) + ' BDT'}</strong></td>
+        <td><span class="status-tag ${statusClass}">${statusLabel}</span></td>
+      `;
+      payoutReportBody.appendChild(tr);
+    });
+  }
+
+  function calculateMetrics(data) {
+    // Exclude attendance logs (SCAN_IN) from cash metrics
+    const financialTx = data.filter(tx => tx.type !== 'SCAN_IN');
+
+    const totalTxCount = financialTx.length;
+    let totalPaid = 0;
+    let salaryPaid = 0;
+    let otPaid = 0;
+    let dormPaid = 0;
+
+    financialTx.forEach(tx => {
+      const amt = parseFloat(tx.amount) || 0;
+      totalPaid += amt;
+
+      const normType = (tx.type || '').toLowerCase();
+      const rawPayoutType = (tx.payoutType || '').toUpperCase();
+
+      if (normType === 'salary' || rawPayoutType.includes('SALARY')) {
+        salaryPaid += amt;
+      } else if (normType === 'ot' || rawPayoutType.includes('OT')) {
+        otPaid += amt;
+      } else if (normType === 'dorm_charge' || rawPayoutType.includes('DORM')) {
+        dormPaid += amt;
+      }
+    });
+
+    metricTxnCount.textContent = totalTxCount;
+    metricTotalPaid.textContent = formatCurrency(totalPaid);
+    metricSalaryPaid.textContent = formatCurrency(salaryPaid);
+    metricOtPaid.textContent = formatCurrency(otPaid);
+    metricDormPaid.textContent = formatCurrency(dormPaid);
+  }
+
+  // Filter Listeners
+  [filterStartDate, filterEndDate, filterPayoutType].forEach(el => {
+    el.addEventListener('change', applyFilters);
+  });
+  filterEmpId.addEventListener('input', applyFilters);
+
+  // Clear filters
+  btnClearFilters.addEventListener('click', () => {
+    filterStartDate.value = '';
+    filterEndDate.value = '';
+    filterEmpId.value = '';
+    filterPayoutType.value = 'ALL';
+    applyFilters();
   });
 
-  // Create new mock employee in database
-  btnAddEmployee.addEventListener('click', async () => {
-    const id = newEmpId.value.trim();
-    const name = newEmpName.value.trim();
-    const designation = newEmpDesig.value.trim();
-    const department = newEmpDept.value.trim();
-    const salary = parseFloat(newEmpSalary.value) || 0;
-    const ot = parseFloat(newEmpOt.value) || 0;
+  // ==========================================================================
+  // ERP EMPLOYEE REGISTRY
+  // ==========================================================================
+  async function loadEmployees() {
+    try {
+      const res = await fetch('/api/employees');
+      allEmployees = await res.json();
+      renderEmployeesTable(allEmployees);
+    } catch (err) {
+      console.error('Error loading employees:', err);
+      registryListBody.innerHTML = `<tr><td colspan="8" class="table-empty" style="color: var(--danger);">Failed to load registry records.</td></tr>`;
+    }
+  }
 
-    if (!id || !name) {
-      alert('Employee ID and Name are required!');
+  function renderEmployeesTable(data) {
+    registryListBody.innerHTML = '';
+
+    if (data.length === 0) {
+      registryListBody.innerHTML = `<tr><td colspan="8" class="table-empty">No registered records in the ERP database.</td></tr>`;
       return;
     }
+
+    data.forEach(emp => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${emp.id}</strong></td>
+        <td><strong>${emp.name}</strong></td>
+        <td>${emp.designation}</td>
+        <td>${emp.department}</td>
+        <td>${formatCurrency(emp.salary)} BDT</td>
+        <td>${formatCurrency(emp.ot)} BDT</td>
+        <td>${formatCurrency(emp.dorm_charge || 0)} BDT</td>
+        <td>
+          <button class="erp-btn btn-secondary trigger-mock-scan" data-id="${emp.id}" style="height: 28px; font-size: 0.75rem; padding: 0 10px;">
+            Simulate Scan
+          </button>
+        </td>
+      `;
+      registryListBody.appendChild(tr);
+    });
+
+    // Add trigger action event listener
+    document.querySelectorAll('.trigger-mock-scan').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const empId = btn.getAttribute('data-id');
+        btn.disabled = true;
+        btn.textContent = 'Scanning...';
+
+        try {
+          const res = await fetch('/api/scan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              UserID: empId.toString(),
+              DeviceID: 'ERP-Web-Simulator',
+              VerifyMode: 'Simulated Face',
+              Time: new Date().toISOString()
+            })
+          });
+
+          if (res.ok) {
+            showToast('Scan Triggered', `Scan command issued for Employee ID ${empId}.`);
+            // Switch menu item automatically to Dashboard Kiosk Tab
+            document.querySelector('[data-tab-target="kiosk"]').click();
+          } else {
+            alert('Failed to simulate scan.');
+          }
+        } catch (e) {
+          console.error(e);
+          alert('Network error during scan simulation.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Simulate Scan';
+        }
+      });
+    });
+  }
+
+  // Register Employee handler
+  btnRegisterEmployee.addEventListener('click', async () => {
+    const id = regEmpId.value.trim();
+    const name = regEmpName.value.trim();
+    const designation = regEmpDesig.value.trim();
+    const department = regEmpDept.value.trim();
+    const salary = parseFloat(regEmpSalary.value) || 0;
+    const ot = parseFloat(regEmpOt.value) || 0;
+
+    if (!id || !name) {
+      alert('Employee ID and Name are required.');
+      return;
+    }
+
+    btnRegisterEmployee.disabled = true;
+    btnRegisterEmployee.textContent = 'Saving...';
 
     try {
       const response = await fetch('/api/employees', {
@@ -500,86 +680,30 @@ document.addEventListener('DOMContentLoaded', () => {
           department,
           salary,
           ot,
-          dorm_charge: 1200.00 // standard default
+          dorm_charge: 1200.00
         })
       });
 
       if (response.ok) {
-        // Clear input form
-        newEmpId.value = '';
-        newEmpName.value = '';
-        newEmpDesig.value = '';
-        newEmpDept.value = '';
+        // Reset form
+        regEmpId.value = '';
+        regEmpName.value = '';
         
-        // Reload list
-        await loadSimulatorEmployees();
-        
-        // Auto select the newly added user
-        simEmployeeSelect.value = id;
-        
-        alert('Employee profile added to local ERP mock database!');
+        showToast('Database Synchronized', `Employee "${name}" has been registered.`);
+        await loadEmployees();
       } else {
-        const errData = await response.json();
-        alert(`Error saving employee: ${errData.error}`);
+        alert('Failed to save employee profile.');
       }
     } catch (err) {
-      console.error('Error creating employee:', err);
+      console.error(err);
+      alert('Network error saving profile.');
+    } finally {
+      btnRegisterEmployee.disabled = false;
+      btnRegisterEmployee.textContent = 'Save Profile';
     }
   });
 
-  // Refresh recent payouts history list
-  async function refreshTransactions() {
-    try {
-      const res = await fetch('/api/transactions');
-      const txs = await res.json();
-
-      simTransactionList.innerHTML = '';
-      if (txs.length === 0) {
-        simTransactionList.innerHTML = '<div class="tx-empty-state">No payments processed in this session.</div>';
-        return;
-      }
-
-      txs.forEach(tx => {
-        const item = document.createElement('div');
-        item.className = 'tx-log-item';
-
-        let typeLabel = 'Salary';
-        if (tx.type === 'ot') typeLabel = 'Overtime';
-        if (tx.type === 'dorm_charge') typeLabel = 'Dorm';
-
-        const date = new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-        item.innerHTML = `
-          <div class="tx-log-header">
-            <span>${tx.employeeName}</span>
-            <span class="tx-log-amount">+${formatCurrency(tx.amount)} BDT</span>
-          </div>
-          <div class="tx-log-meta">
-            <span>${typeLabel} (${tx.employeeId})</span>
-            <span>${date}</span>
-          </div>
-        `;
-        simTransactionList.appendChild(item);
-      });
-    } catch (err) {
-      console.error('Error fetching transactions:', err);
-    }
-  }
-
-  // Clear Logs trigger
-  btnClearLogs.addEventListener('click', async () => {
-    if (!confirm('Are you sure you want to clear the transaction log history?')) return;
-    try {
-      const res = await fetch('/api/transactions/clear', { method: 'POST' });
-      if (res.ok) {
-        refreshTransactions();
-      }
-    } catch (err) {
-      console.error('Error clearing transaction logs:', err);
-    }
-  });
-
-  // Initialize Simulator Dropdowns and Logs
-  loadSimulatorEmployees();
-  refreshTransactions();
+  // Initial Data Load
+  loadTransactions();
+  loadEmployees();
 });
