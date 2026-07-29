@@ -22,6 +22,7 @@ const HANVON_TCP_PORT = 9920; // Dedicated port for the Hanvon Device
 const DB_PATH = path.join(__dirname, 'erp_db.json');
 const LOG_PATH = path.join(__dirname, 'transactions.json');
 const SETUP_PATH = path.join(__dirname, 'payment_setup.json');
+const USERS_PATH = path.join(__dirname, 'users.json');
 
 let activeScanSession = null; // Stores the latest scan to sync clients who connect shortly after the scan
 
@@ -34,6 +35,38 @@ if (!fs.existsSync(LOG_PATH)) {
 }
 if (!fs.existsSync(SETUP_PATH)) {
   fs.writeFileSync(SETUP_PATH, JSON.stringify([], null, 2), 'utf8');
+}
+if (!fs.existsSync(USERS_PATH)) {
+  const defaultUsers = [
+    {
+      id: "1",
+      username: "admin",
+      name: "Md. Abdur Rahaman",
+      email: "abdur.rahaman@pakiza.com",
+      role: "admin",
+      status: "active",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "2",
+      username: "operator1",
+      name: "Sajjad Hossain",
+      email: "sajjad.hossain@pakiza.com",
+      role: "operator",
+      status: "active",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "3",
+      username: "manager1",
+      name: "Tariqul Islam",
+      email: "tariqul.islam@pakiza.com",
+      role: "manager",
+      status: "inactive",
+      createdAt: new Date().toISOString()
+    }
+  ];
+  fs.writeFileSync(USERS_PATH, JSON.stringify(defaultUsers, null, 2), 'utf8');
 }
 
 // --- HELPER FUNCTIONS ---
@@ -71,6 +104,24 @@ function writeERPDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
   } catch (error) {
     console.error('Error writing ERP database:', error);
+  }
+}
+
+function readUsers() {
+  try {
+    const data = fs.readFileSync(USERS_PATH, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading users database:', error);
+    return [];
+  }
+}
+
+function writeUsers(data) {
+  try {
+    fs.writeFileSync(USERS_PATH, JSON.stringify(data, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error writing users database:', error);
   }
 }
 
@@ -168,6 +219,77 @@ app.post('/api/transactions/clear', (req, res) => {
   res.json({ success: true });
 });
 
+// API: Get all system users
+app.get('/api/users', (req, res) => {
+  res.json(readUsers());
+});
+
+// API: Add or Update system user
+app.post('/api/users', (req, res) => {
+  const { id, username, name, email, role, status } = req.body;
+  if (!username || !name || !email || !role) {
+    return res.status(400).json({ error: 'Username, Name, Email, and Role are required.' });
+  }
+
+  const users = readUsers();
+  let user;
+
+  if (id) {
+    // Update existing user
+    const index = users.findIndex(u => u.id.toString() === id.toString());
+    if (index === -1) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    user = {
+      ...users[index],
+      username,
+      name,
+      email,
+      role,
+      status: status || users[index].status
+    };
+    users[index] = user;
+  } else {
+    // Create new user
+    user = {
+      id: Date.now().toString(),
+      username,
+      name,
+      email,
+      role,
+      status: status || 'active',
+      createdAt: new Date().toISOString()
+    };
+    users.push(user);
+  }
+
+  writeUsers(users);
+  res.json({ success: true, user });
+});
+
+// API: Delete system user
+app.delete('/api/users/:id', (req, res) => {
+  const { id } = req.params;
+  const users = readUsers();
+  const filtered = users.filter(u => u.id.toString() !== id.toString());
+  writeUsers(filtered);
+  res.json({ success: true });
+});
+
+// API: Toggle user status (active/inactive)
+app.post('/api/users/:id/toggle-status', (req, res) => {
+  const { id } = req.params;
+  const users = readUsers();
+  const index = users.findIndex(u => u.id.toString() === id.toString());
+  if (index === -1) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  users[index].status = users[index].status === 'active' ? 'inactive' : 'active';
+  writeUsers(users);
+  res.json({ success: true, user: users[index] });
+});
+
 // API: Get payment setup configuration
 app.get('/api/payment-setup', (req, res) => {
   res.json(readPaymentSetup());
@@ -241,6 +363,10 @@ app.post('/api/pay', (req, res) => {
   const transactions = readTransactions();
   transactions.push(newTransaction);
   writeTransactions(transactions);
+
+  // Clear the paid balance and update the database
+  employee[type] = 0.00;
+  writeERPDatabase(employees);
 
   // Clear active scan session since payment is done
   activeScanSession = null;

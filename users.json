@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "username": "admin",
+    "name": "Md. Abdur Rahaman",
+    "email": "abdur.rahaman@pakiza.com",
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2026-07-29T10:02:03.119Z"
+  },
+  {
+    "id": "2",
+    "username": "operator1",
+    "name": "Sajjad Hossain",
+    "email": "sajjad.hossain@pakiza.com",
+    "role": "operator",
+    "status": "active",
+    "createdAt": "2026-07-29T10:02:03.120Z"
+  },
+  {
+    "id": "3",
+    "username": "manager1",
+    "name": "Tariqul Islam",
+    "email": "tariqul.islam@pakiza.com",
+    "role": "manager",
+    "status": "inactive",
+    "createdAt": "2026-07-29T10:02:03.120Z"
+  }
+]
