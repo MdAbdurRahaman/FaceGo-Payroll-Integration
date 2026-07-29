@@ -16,11 +16,12 @@ const io = new Server(server, {
 });
 
 // Port configuration
-const WEB_PORT = process.env.PORT || 5000;
+const WEB_PORT = process.env.PORT || 5001;
 const HANVON_TCP_PORT = 9920; // Dedicated port for the Hanvon Device
 
 const DB_PATH = path.join(__dirname, 'erp_db.json');
 const LOG_PATH = path.join(__dirname, 'transactions.json');
+const SETUP_PATH = path.join(__dirname, 'payment_setup.json');
 
 let activeScanSession = null; // Stores the latest scan to sync clients who connect shortly after the scan
 
@@ -30,6 +31,28 @@ if (!fs.existsSync(DB_PATH)) {
 }
 if (!fs.existsSync(LOG_PATH)) {
   fs.writeFileSync(LOG_PATH, JSON.stringify([], null, 2), 'utf8');
+}
+if (!fs.existsSync(SETUP_PATH)) {
+  fs.writeFileSync(SETUP_PATH, JSON.stringify([], null, 2), 'utf8');
+}
+
+// --- HELPER FUNCTIONS ---
+function readPaymentSetup() {
+  try {
+    const data = fs.readFileSync(SETUP_PATH, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading payment setup:', error);
+    return [];
+  }
+}
+
+function writePaymentSetup(data) {
+  try {
+    fs.writeFileSync(SETUP_PATH, JSON.stringify(data, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error writing payment setup:', error);
+  }
 }
 
 // --- HELPER FUNCTIONS ---
@@ -142,6 +165,39 @@ app.get('/api/transactions', (req, res) => {
 // API: Clear transactions
 app.post('/api/transactions/clear', (req, res) => {
   writeTransactions([]);
+  res.json({ success: true });
+});
+
+// API: Get payment setup configuration
+app.get('/api/payment-setup', (req, res) => {
+  res.json(readPaymentSetup());
+});
+
+// API: Add new payment setup rule
+app.post('/api/payment-setup', (req, res) => {
+  const { startDate, endDate, payoutType } = req.body;
+  if (!startDate || !endDate || !payoutType) {
+    return res.status(400).json({ error: 'startDate, endDate, and payoutType are required' });
+  }
+
+  const setups = readPaymentSetup();
+  const newSetup = {
+    id: Date.now().toString(),
+    startDate,
+    endDate,
+    payoutType
+  };
+  setups.push(newSetup);
+  writePaymentSetup(setups);
+  res.json({ success: true, rule: newSetup });
+});
+
+// API: Delete payment setup rule
+app.delete('/api/payment-setup/:id', (req, res) => {
+  const { id } = req.params;
+  const setups = readPaymentSetup();
+  const filtered = setups.filter(s => s.id.toString() !== id.toString());
+  writePaymentSetup(filtered);
   res.json({ success: true });
 });
 

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedPayoutType = null; // salary, ot, dorm_charge
   let allTransactions = [];
   let allEmployees = [];
+  let allSetupRules = [];
 
   // Timers
   let inactivityTimer = null;
@@ -94,6 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements - Table Bodies
   const payoutReportBody = document.getElementById('payout-report-body');
   const registryListBody = document.getElementById('registry-list-body');
+  const setupListBody = document.getElementById('setup-list-body');
+
+  // DOM Elements - Payment Setup Form
+  const setupStartDate = document.getElementById('setup-start-date');
+  const setupEndDate = document.getElementById('setup-end-date');
+  const setupPayoutType = document.getElementById('setup-payout-type');
+  const btnSaveSetup = document.getElementById('btn-save-setup');
 
   // DOM Elements - Employee Register Form
   const regEmpId = document.getElementById('reg-emp-id');
@@ -157,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let breadcrumbText = 'FaceGo Kiosk Terminal';
       if (targetTab === 'history') breadcrumbText = 'Payout History Log';
       if (targetTab === 'registry') breadcrumbText = 'ERP Employee Registry';
+      if (targetTab === 'setup') breadcrumbText = 'Payment Setup';
       currentBreadcrumb.textContent = breadcrumbText;
 
       // Refresh data
@@ -165,6 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (targetTab === 'registry') {
         loadEmployees();
+      }
+      if (targetTab === 'setup') {
+        loadSetupRules();
       }
     });
   });
@@ -268,6 +280,22 @@ document.addEventListener('DOMContentLoaded', () => {
     connectionText.textContent = 'Reconnecting...';
   });
 
+  function getActivePayoutTypeForToday() {
+    // Get current local date in YYYY-MM-DD format (timezone-aware local date)
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    // Check if any rule matches
+    const activeRule = allSetupRules.find(rule => {
+      return todayStr >= rule.startDate && todayStr <= rule.endDate;
+    });
+    
+    return activeRule ? activeRule.payoutType : null;
+  }
+
   // Receive Face Scan Event
   socket.on('employee-scanned', (data) => {
     console.log('Real-time scan received:', data);
@@ -285,6 +313,18 @@ document.addEventListener('DOMContentLoaded', () => {
     empSalary.textContent = formatCurrency(currentEmployee.salary);
     empOt.textContent = formatCurrency(currentEmployee.ot);
     empDorm.textContent = formatCurrency(currentEmployee.dorm_charge || 0);
+
+    // Filter payout options based on date setup rules
+    const activePayoutType = getActivePayoutTypeForToday();
+    if (activePayoutType) {
+      cardPaySalary.style.display = (activePayoutType === 'salary') ? 'block' : 'none';
+      cardPayOt.style.display = (activePayoutType === 'ot') ? 'block' : 'none';
+      cardPayDorm.style.display = (activePayoutType === 'dorm_charge') ? 'block' : 'none';
+    } else {
+      cardPaySalary.style.display = 'block';
+      cardPayOt.style.display = 'block';
+      cardPayDorm.style.display = 'block';
+    }
 
     let timeFormatted = '';
     try {
@@ -703,7 +743,119 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Fetch active setup rules
+  async function loadSetupRules() {
+    try {
+      const res = await fetch('/api/payment-setup');
+      if (res.ok) {
+        allSetupRules = await res.json();
+        renderSetupRules();
+      }
+    } catch (err) {
+      console.error('Error loading setup rules:', err);
+    }
+  }
+
+  // Render setup rules to the table
+  function renderSetupRules() {
+    setupListBody.innerHTML = '';
+    if (allSetupRules.length === 0) {
+      setupListBody.innerHTML = `<tr><td colspan="4" class="table-empty">No active schedules configured. Default is to display all options.</td></tr>`;
+      return;
+    }
+
+    const typeLabels = {
+      salary: 'Base Salary',
+      ot: 'Overtime',
+      dorm_charge: 'Dorm Charge'
+    };
+
+    allSetupRules.forEach(rule => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${rule.startDate}</strong></td>
+        <td><strong>${rule.endDate}</strong></td>
+        <td><span class="payout-type-tag ${rule.payoutType}">${typeLabels[rule.payoutType] || rule.payoutType}</span></td>
+        <td style="text-align: center;">
+          <button class="erp-btn btn-danger delete-setup-btn" data-id="${rule.id}" style="height: 28px; font-size: 0.75rem; padding: 0 10px;">
+            Delete
+          </button>
+        </td>
+      `;
+      setupListBody.appendChild(tr);
+    });
+
+    // Add delete event listeners
+    document.querySelectorAll('.delete-setup-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const ruleId = btn.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this payment setup rule?')) {
+          try {
+            const res = await fetch(`/api/payment-setup/${ruleId}`, {
+              method: 'DELETE'
+            });
+            if (res.ok) {
+              showToast('Setup Updated', 'Payment setup rule deleted successfully.');
+              await loadSetupRules();
+            } else {
+              alert('Failed to delete rule.');
+            }
+          } catch (err) {
+            console.error(err);
+            alert('Network error deleting rule.');
+          }
+        }
+      });
+    });
+  }
+
+  // Save new setup rule
+  btnSaveSetup.addEventListener('click', async () => {
+    const startDate = setupStartDate.value;
+    const endDate = setupEndDate.value;
+    const payoutType = setupPayoutType.value;
+
+    if (!startDate || !endDate || !payoutType) {
+      alert('Please fill out all fields.');
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      alert('Start Date cannot be after End Date.');
+      return;
+    }
+
+    btnSaveSetup.disabled = true;
+    btnSaveSetup.textContent = 'Saving...';
+
+    try {
+      const res = await fetch('/api/payment-setup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ startDate, endDate, payoutType })
+      });
+
+      if (res.ok) {
+        setupStartDate.value = '';
+        setupEndDate.value = '';
+        showToast('Setup Rules Updated', 'New payment range rule saved.');
+        await loadSetupRules();
+      } else {
+        alert('Failed to save setup rule.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error saving rule.');
+    } finally {
+      btnSaveSetup.disabled = false;
+      btnSaveSetup.textContent = 'Save Setup Rule';
+    }
+  });
+
   // Initial Data Load
   loadTransactions();
   loadEmployees();
+  loadSetupRules();
 });
